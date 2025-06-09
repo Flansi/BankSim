@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrierung</title>
+</head>
+<body>
+    <h2>Registrierung</h2>
+    {% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
+    <form method="post">
+        <input type="text" name="username" placeholder="Benutzername" required>
+        <input type="password" name="password" placeholder="Passwort" required>
+        <button type="submit">Registrieren</button>
+    </form>
+    <a href="{{ url_for('login') }}">Zurück zum Login</a>
+</body>
+</html>
