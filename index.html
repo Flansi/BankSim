@@ -85,6 +85,20 @@
             font-size: 0.9rem;
             color: #666;
         }
+        .category-nav {
+            display: flex;
+            background-color: #0055a5;
+        }
+        .category-nav a {
+            color: white;
+            padding: 1rem;
+            text-decoration: none;
+            flex: 1;
+            text-align: center;
+        }
+        .category-nav a:hover {
+            background-color: #003d75;
+        }
     </style>
 </head>
 <body>
@@ -98,6 +112,15 @@
         <input type="password" id="password" placeholder="Passwort">
         <button onclick="login()">Einloggen</button>
     </div>
+    <nav class="category-nav">
+        <a href="filialen.html">Filialen</a>
+        <a href="mitarbeiter.html">Mitarbeiter</a>
+        <a href="kundenservice.html">Kundenservice</a>
+        <a href="sperrhotline.html">Sperrhotline</a>
+        <a href="rechner.html">Rechner</a>
+        <a href="karriere.html">Karriere</a>
+    </nav>
+
 
     <div id="app" class="hidden">
         <nav>
