@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Simulator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #003366;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+        }
+        nav {
+            display: flex;
+            background-color: #004080;
+        }
+        nav a {
+            color: white;
+            padding: 1rem;
+            text-decoration: none;
+            flex: 1;
+            text-align: center;
+        }
+        nav a:hover {
+            background-color: #00264d;
+        }
+        #content {
+            padding: 2rem;
+        }
+        .hidden {
+            display: none;
+        }
+        .login-container {
+            max-width: 300px;
+            margin: 100px auto;
+            padding: 2rem;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .login-container input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 0.5rem;
+            background-color: #004080;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Meine Online-Bank</h1>
+    </header>
+
+    <div id="login" class="login-container">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Benutzername">
+        <input type="password" id="password" placeholder="Passwort">
+        <button onclick="login()">Einloggen</button>
+    </div>
+
+    <div id="app" class="hidden">
+        <nav>
+            <a href="#" onclick="showPage('home')">Home</a>
+            <a href="#" onclick="showPage('balance')">Kontostand</a>
+            <a href="#" onclick="showPage('transfer')">Überweisung</a>
+            <a href="#" onclick="showPage('settings')">Einstellungen</a>
+            <a href="#" onclick="logout()">Abmelden</a>
+        </nav>
+        <div id="content"></div>
+    </div>
+
+    <script>
+        function login() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            // Simple check (nicht sicher!)
+            if (user && pass) {
+                document.getElementById('login').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
+                showPage('home');
+            } else {
+                alert('Bitte Benutzername und Passwort eingeben');
+            }
+        }
+
+        function logout() {
+            document.getElementById('login').classList.remove('hidden');
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        function showPage(page) {
+            const content = document.getElementById('content');
+            switch(page) {
+                case 'home':
+                    content.innerHTML = '<h2>Willkommen bei Ihrer Online-Bank!</h2><p>Wählen Sie eine Option aus dem Menü.</p>';
+                    break;
+                case 'balance':
+                    content.innerHTML = '<h2>Kontostand</h2><p>Aktueller Kontostand: <strong>1.000,00 €</strong></p>';
+                    break;
+                case 'transfer':
+                    content.innerHTML = `
+                        <h2>Überweisung</h2>
+                        <p>(Nur eine Demo, keine echte Überweisung)</p>
+                        <input type="text" placeholder="Empfänger">
+                        <input type="text" placeholder="Betrag">
+                        <button>Absenden</button>
+                    `;
+                    break;
+                case 'settings':
+                    content.innerHTML = '<h2>Einstellungen</h2><p>Hier können Sie Ihre persönlichen Einstellungen vornehmen.</p>';
+                    break;
+                default:
+                    content.innerHTML = '';
+            }
+        }
+    </script>
+</body>
+</html>
+
