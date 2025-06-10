@@ -21,3 +21,22 @@ BankSim is a small demo of a banking website built with [Flask](https://flask.pa
    This starts a development server on `http://127.0.0.1:5000/`.
 
 On first run, a SQLite database (`database.db`) will be created automatically. You can then register a user and log in to access the demo pages.
+
+## Windows Setup
+
+If you are using Windows, open **Command Prompt** or **PowerShell** and run the following commands:
+
+1. Create and activate a virtual environment:
+   ```cmd
+   py -3 -m venv venv
+   venv\Scripts\activate
+   ```
+2. Install the dependencies:
+   ```cmd
+   pip install -r requirements.txt
+   ```
+3. Run the application:
+   ```cmd
+   python app.py
+   ```
+   The development server will be available at `http://127.0.0.1:5000/`.
