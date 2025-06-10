@@ -72,5 +72,30 @@ def filialen_page():
     """Zeigt die Filialenseite an."""
     return render_template('filialen.html')
 
+
+# Neue Routen für zusätzliche statische Seiten
+@app.route('/sperrhotline.html')
+def sperrhotline_page():
+    """Zeigt die Sperrhotline an."""
+    return render_template('sperrhotline.html')
+
+
+@app.route('/kundenservice.html')
+def kundenservice_page():
+    """Zeigt den Kundenservice an."""
+    return render_template('kundenservice.html')
+
+
+@app.route('/mitarbeiter.html')
+def mitarbeiter_page():
+    """Zeigt die Mitarbeiterseite an."""
+    return render_template('mitarbeiter.html')
+
+
+@app.route('/index.html')
+def index_page():
+    """Zeigt die Startseite an."""
+    return render_template('index.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
