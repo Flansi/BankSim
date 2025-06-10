@@ -54,5 +54,23 @@ def logout():
     session.pop('user_id', None)
     return redirect(url_for('login'))
 
+# Routen für statische Informationsseiten
+@app.route('/karriere.html')
+def karriere_page():
+    """Zeigt die Karriereseite an."""
+    return render_template('karriere.html')
+
+
+@app.route('/rechner.html')
+def rechner_page():
+    """Zeigt die Rechnerseite an."""
+    return render_template('rechner.html')
+
+
+@app.route('/filialen.html')
+def filialen_page():
+    """Zeigt die Filialenseite an."""
+    return render_template('filialen.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
