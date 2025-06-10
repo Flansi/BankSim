@@ -114,45 +114,31 @@
     <a href="karriere.html">Karriere</a>
 </nav>
 
-    <div id="login" class="login-container">
+    {% if not session.get('user_id') %}
+    <div class="login-container">
         <h2>Login</h2>
-        <input type="text" id="username" placeholder="Benutzername">
-        <input type="password" id="password" placeholder="Passwort">
-        <button onclick="login()">Einloggen</button>
+        {% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
+        <form method="post" action="{{ url_for('login', from_index=1) }}">
+            <input type="text" name="username" placeholder="Benutzername" required>
+            <input type="password" name="password" placeholder="Passwort" required>
+            <button type="submit">Einloggen</button>
+        </form>
+        <a href="{{ url_for('register') }}">Registrieren</a>
     </div>
-
-
-    <div id="app" class="hidden">
+    {% else %}
+    <div id="app">
         <nav>
             <a href="#" onclick="showPage('home')">Home</a>
             <a href="#" onclick="showPage('balance')">Kontostand</a>
             <a href="#" onclick="showPage('transfer')">Überweisung</a>
             <a href="#" onclick="showPage('settings')">Einstellungen</a>
-            <a href="#" onclick="logout()">Abmelden</a>
+            <a href="{{ url_for('logout') }}">Abmelden</a>
         </nav>
         <div id="content"></div>
     </div>
+    {% endif %}
 
     <script>
-        function login() {
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-            // Simple check (nicht sicher!)
-            if (user && pass) {
-                document.getElementById('login').classList.add('hidden');
-                document.getElementById('app').classList.remove('hidden');
-                showPage('home');
-            } else {
-                alert('Bitte Benutzername und Passwort eingeben');
-            }
-        }
-
-        function logout() {
-            document.getElementById('login').classList.remove('hidden');
-            document.getElementById('app').classList.add('hidden');
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-        }
 
         function showPage(page) {
             const content = document.getElementById('content');
