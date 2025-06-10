@@ -1,11 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import timedelta
 
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = 'change_this_secret'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
 
 db = SQLAlchemy(app)
 
@@ -25,14 +27,19 @@ def dashboard():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    from_index = request.args.get('from_index')
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
+            session.permanent = True
             session['user_id'] = user.id
             return redirect(url_for('dashboard'))
-        return render_template("login.html", error="Ungültige Anmeldedaten")
+        error = "Ungültige Anmeldedaten"
+        if from_index:
+            return render_template('index.html', error=error)
+        return render_template('login.html', error=error)
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
