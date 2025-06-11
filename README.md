@@ -1,6 +1,6 @@
 # BankSim
 
-BankSim is a small banking website built with [Flask](https://flask.palletsprojects.com/). It features a basic login and registration system and several HTML pages in German for various banking services.
+BankSim is a small banking website for **Wien ONline-Bank** built with [Flask](https://flask.palletsprojects.com/). It features a basic login and registration system and several HTML pages in German for various banking services.
 
 ## Setup
 

@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bank Simulator</title>
+    <title>Wien ONline-Bank</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
     <header class="bg-primary text-white text-center py-3 mb-4">
-        <h1 class="h3 m-0">Meine Online-Bank</h1>
+        <h1 class="h3 m-0">Wien ONline-Bank</h1>
     </header>
     <nav class="nav justify-content-center mb-4">
         <a class="nav-link" href="filialen.html">Filialen</a>
@@ -22,7 +22,7 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-4">
-                <div class="card p-4">
+                <div class="card p-4 mb-4">
                     <h2 class="h4 mb-3 text-center">Login</h2>
                     {% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
                     <form method="post" action="{{ url_for('login', from_index=1) }}">
@@ -37,6 +37,16 @@
                     <div class="text-center mt-2">
                         <a href="{{ url_for('register') }}">Registrieren</a>
                     </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card p-4">
+                    <h2 class="h5 mb-3">Aktuelles bei Wien ONline-Bank</h2>
+                    <ul class="list-unstyled mb-0">
+                        <li><strong>Neue App-Version:</strong> Unsere mobile Banking-App wurde aktualisiert und bietet Ihnen jetzt noch mehr Komfort.</li>
+                        <li><strong>Filialeröffnung:</strong> Besuchen Sie ab Mai unsere neue Filiale am Stephansplatz.</li>
+                        <li><strong>Sicher online:</strong> Lesen Sie unsere neuesten Tipps zum Schutz vor Phishing.</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -59,7 +69,7 @@
             const content = document.getElementById('content');
             switch(page) {
                 case 'home':
-                    content.innerHTML = '<h2>Willkommen bei Ihrer Online-Bank!</h2><p>Wählen Sie eine Option aus dem Menü.</p>';
+                    content.innerHTML = '<h2>Willkommen bei Wien ONline-Bank!</h2><p>Wählen Sie eine Option aus dem Menü.</p>';
                     break;
                 case 'balance':
                     content.innerHTML = `
