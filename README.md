@@ -63,3 +63,13 @@ python manage_db.py add-tx USERNAME BETRAG "Beschreibung" --date 2023-12-31
 ```
 
 So können Sie Daten verändern, ohne die eigentliche Bankseite zu starten.
+
+## Grafische Datenbankverwaltung
+
+Wenn Sie lieber eine einfache grafische Oberfläche nutzen möchten, starten Sie `manage_db_gui.py`:
+
+```bash
+python manage_db_gui.py
+```
+
+Damit lassen sich Benutzer und Transaktionen bequem per Mausklick anlegen oder löschen.
