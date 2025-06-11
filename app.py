@@ -113,8 +113,8 @@ def mitarbeiter_page():
 
 @app.route('/index.html')
 def index_page():
-    """Zeigt die Startseite an."""
-    return render_template('index.html')
+    """Leitet zur Startseite weiter."""
+    return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
     app.run(debug=True)
