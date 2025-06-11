@@ -18,7 +18,7 @@ BankSim is a small banking website for **Wien ONline-Bank** built with [Flask](h
    ```bash
    python app.py
    ```
-   This starts a development server on `http://127.0.0.1:5000/`.
+   This starts a development server on `http://127.0.0.1:80/`.
 
 On first run, a SQLite database (`database.db`) will be created automatically. You can then register a user and log in to access the pages.
 
@@ -39,4 +39,4 @@ If you are using Windows, open **Command Prompt** or **PowerShell** and run the 
    ```cmd
    python app.py
    ```
-   The development server will be available at `http://127.0.0.1:5000/`.
+   The development server will be available at `http://127.0.0.1:80/`.
