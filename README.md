@@ -1,6 +1,6 @@
 # BankSim
 
-BankSim is a small demo of a banking website built with [Flask](https://flask.palletsprojects.com/). It features a basic login and registration system and several HTML pages in German for various banking services.
+BankSim is a small banking website built with [Flask](https://flask.palletsprojects.com/). It features a basic login and registration system and several HTML pages in German for various banking services.
 
 ## Setup
 
@@ -20,7 +20,7 @@ BankSim is a small demo of a banking website built with [Flask](https://flask.pa
    ```
    This starts a development server on `http://127.0.0.1:5000/`.
 
-On first run, a SQLite database (`database.db`) will be created automatically. You can then register a user and log in to access the demo pages.
+On first run, a SQLite database (`database.db`) will be created automatically. You can then register a user and log in to access the pages.
 
 ## Windows Setup
 

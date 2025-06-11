@@ -4,154 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bank Simulator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-        }
-        header {
-            background-color: #003366;
-            color: #fff;
-            padding: 1rem;
-            text-align: center;
-        }
-        nav {
-            display: flex;
-            background-color: #004080;
-        }
-        nav a {
-            color: white;
-            padding: 1rem;
-            text-decoration: none;
-            flex: 1;
-            text-align: center;
-        }
-        nav a:hover {
-            background-color: #00264d;
-        }
-        #content {
-            padding: 2rem;
-        }
-        .hidden {
-            display: none;
-        }
-        .login-container {
-            max-width: 300px;
-            margin: 100px auto;
-            padding: 2rem;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .login-container input {
-            width: 100%;
-            padding: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        .login-container button {
-            width: 100%;
-            padding: 0.5rem;
-            background-color: #004080;
-            color: white;
-            border: none;
-        }
-        .transfer-form {
-            max-width: 500px;
-            margin: 1rem auto;
-            padding: 2rem;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .transfer-form label {
-            display: block;
-            margin-top: 0.5rem;
-        }
-        .transfer-form input {
-            width: 100%;
-            padding: 0.5rem;
-            margin-top: 0.25rem;
-            margin-bottom: 1rem;
-        }
-        .transfer-form button {
-            width: 100%;
-            padding: 0.5rem;
-            background-color: #004080;
-            color: white;
-            border: none;
-        }
-        .note {
-            text-align: center;
-            font-size: 0.9rem;
-            color: #666;
-        }
-        .category-nav {
-            display: flex;
-            background-color: #0055a5;
-        }
-        .category-nav a {
-            color: white;
-            padding: 1rem;
-            text-decoration: none;
-            flex: 1;
-            text-align: center;
-        }
-        .category-nav a:hover {
-            background-color: #003d75;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 0.5rem;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <header>
-        <h1>Meine Online-Bank</h1>
+<body class="bg-light">
+    <header class="bg-primary text-white text-center py-3 mb-4">
+        <h1 class="h3 m-0">Meine Online-Bank</h1>
     </header>
-<nav class="category-nav">
-    <a href="filialen.html">Filialen</a>
-    <a href="mitarbeiter.html">Mitarbeiter</a>
-    <a href="kundenservice.html">Kundenservice</a>
-    <a href="sperrhotline.html">Sperrhotline</a>
-    <a href="rechner.html">Rechner</a>
-    <a href="karriere.html">Karriere</a>
-</nav>
-
+    <nav class="nav justify-content-center mb-4">
+        <a class="nav-link" href="filialen.html">Filialen</a>
+        <a class="nav-link" href="mitarbeiter.html">Mitarbeiter</a>
+        <a class="nav-link" href="kundenservice.html">Kundenservice</a>
+        <a class="nav-link" href="sperrhotline.html">Sperrhotline</a>
+        <a class="nav-link" href="rechner.html">Rechner</a>
+        <a class="nav-link" href="karriere.html">Karriere</a>
+    </nav>
     {% if not session.get('user_id') %}
-    <div class="login-container">
-        <h2>Login</h2>
-        {% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
-        <form method="post" action="{{ url_for('login', from_index=1) }}">
-            <input type="text" name="username" placeholder="Benutzername" required>
-            <input type="password" name="password" placeholder="Passwort" required>
-            <button type="submit">Einloggen</button>
-        </form>
-        <a href="{{ url_for('register') }}">Registrieren</a>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <div class="card p-4">
+                    <h2 class="h4 mb-3 text-center">Login</h2>
+                    {% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
+                    <form method="post" action="{{ url_for('login', from_index=1) }}">
+                        <div class="mb-3">
+                            <input type="text" name="username" class="form-control" placeholder="Benutzername" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" name="password" class="form-control" placeholder="Passwort" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Einloggen</button>
+                    </form>
+                    <div class="text-center mt-2">
+                        <a href="{{ url_for('register') }}">Registrieren</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     {% else %}
-    <div id="app">
-        <nav>
-            <a href="#" onclick="showPage('home')">Home</a>
-            <a href="#" onclick="showPage('balance')">Kontostand</a>
-            <a href="#" onclick="showPage('transfer')">Überweisung</a>
-            <a href="#" onclick="showPage('settings')">Einstellungen</a>
-            <a href="{{ url_for('logout') }}">Abmelden</a>
+    <div id="app" class="container">
+        <nav class="nav mb-4">
+            <a class="nav-link" href="#" onclick="showPage('home')">Home</a>
+            <a class="nav-link" href="#" onclick="showPage('balance')">Kontostand</a>
+            <a class="nav-link" href="#" onclick="showPage('transfer')">Überweisung</a>
+            <a class="nav-link" href="#" onclick="showPage('settings')">Einstellungen</a>
+            <a class="nav-link" href="{{ url_for('logout') }}">Abmelden</a>
         </nav>
         <div id="content"></div>
     </div>
     {% endif %}
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-
         function showPage(page) {
             const content = document.getElementById('content');
             switch(page) {
@@ -163,7 +66,8 @@
                         <h2>Kontostand</h2>
                         <p>Aktueller Kontostand: <strong>1.000,00 €</strong></p>
                         <h3>Buchungshistorie</h3>
-                        <table>
+                        <div class="table-responsive">
+                        <table class="table table-striped">
                             <thead>
                                 <tr>
                                     <th>Datum</th>
@@ -225,30 +129,37 @@
 
                             </tbody>
                         </table>
+                        </div>
                     `;
                     break;
                 case 'transfer':
                     content.innerHTML = `
                         <h2>Überweisung</h2>
-                        <form class="transfer-form" onsubmit="submitTransfer(event)">
-                            <label for="recipient">Empfänger</label>
-                            <input id="recipient" type="text" placeholder="Name des Empfängers" required>
-
-                            <label for="iban">IBAN</label>
-                            <input id="iban" type="text" placeholder="DE00 0000 0000 0000 0000 00" required>
-
-                            <label for="bic">BIC</label>
-                            <input id="bic" type="text" placeholder="BANKDEFFXXX" required>
-
-                            <label for="amount">Betrag in EUR</label>
-                            <input id="amount" type="number" step="0.01" placeholder="0,00" required>
-
-                            <label for="purpose">Verwendungszweck</label>
-                            <input id="purpose" type="text" placeholder="Verwendungszweck">
-
-                            <button type="submit">Überweisen</button>
+                        <form class="row g-3" onsubmit="submitTransfer(event)">
+                            <div class="col-12">
+                                <label for="recipient" class="form-label">Empfänger</label>
+                                <input id="recipient" class="form-control" type="text" placeholder="Name des Empfängers" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="iban" class="form-label">IBAN</label>
+                                <input id="iban" class="form-control" type="text" placeholder="DE00 0000 0000 0000 0000 00" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bic" class="form-label">BIC</label>
+                                <input id="bic" class="form-control" type="text" placeholder="BANKDEFFXXX" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="amount" class="form-label">Betrag in EUR</label>
+                                <input id="amount" class="form-control" type="number" step="0.01" placeholder="0,00" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="purpose" class="form-label">Verwendungszweck</label>
+                                <input id="purpose" class="form-control" type="text" placeholder="Verwendungszweck">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary w-100">Überweisen</button>
+                            </div>
                         </form>
-                        <p class="note">(Nur eine Demo, keine echte Überweisung)</p>
                     `;
                     break;
                 case 'settings':
@@ -261,9 +172,8 @@
 
         function submitTransfer(event) {
             event.preventDefault();
-            alert('Überweisung ausgeführt (Demo)');
+            alert('Überweisung ausgeführt');
         }
     </script>
 </body>
 </html>
-
