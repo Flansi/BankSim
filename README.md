@@ -40,3 +40,26 @@ If you are using Windows, open **Command Prompt** or **PowerShell** and run the 
    python app.py
    ```
    The development server will be available at `http://127.0.0.1:80/`.
+
+## Datenbank direkt bearbeiten
+
+Mit dem Skript `manage_db.py` können Sie die SQLite-Datenbank ohne die Weboberfläche verwalten. Einige Beispiele:
+
+```bash
+# Benutzer auflisten
+python manage_db.py list-users
+
+# Neuen Benutzer anlegen
+python manage_db.py add-user USERNAME
+
+# Benutzer löschen
+python manage_db.py delete-user USERNAME
+
+# Transaktionen eines Benutzers anzeigen
+python manage_db.py list-tx USERNAME
+
+# Neue Transaktion hinzufügen
+python manage_db.py add-tx USERNAME BETRAG "Beschreibung" --date 2023-12-31
+```
+
+So können Sie Daten verändern, ohne die eigentliche Bankseite zu starten.
