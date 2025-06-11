@@ -16,13 +16,25 @@ class User(db.Model):
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
 
+
+class Transaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    description = db.Column(db.String(200), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    user = db.relationship('User', backref=db.backref('transactions', lazy=True))
+
 with app.app_context():
     db.create_all()
 
 @app.route('/')
 def dashboard():
     if 'user_id' in session:
-        return render_template('index.html')
+        user = User.query.get(session['user_id'])
+        transactions = Transaction.query.filter_by(user_id=user.id).order_by(Transaction.date.desc()).all()
+        balance = sum(t.amount for t in transactions)
+        return render_template('index.html', transactions=transactions, balance=balance)
     return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
