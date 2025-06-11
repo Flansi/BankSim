@@ -145,11 +145,28 @@
             }
         }
 
+        let pendingTransferData = null;
+        let authModal;
+        let authInput;
+        let authError;
+
         function submitTransfer(event) {
             event.preventDefault();
             const form = event.target;
-            const data = new FormData(form);
-            fetch('/transfer', {method: 'POST', body: data}).then(res => {
+            pendingTransferData = new FormData(form);
+            authInput.value = '';
+            authError.classList.add('d-none');
+            authModal.show();
+        }
+
+        function confirmAuthCode() {
+            const code = authInput.value.trim();
+            if (!/^\d{6}$/.test(code)) {
+                authError.classList.remove('d-none');
+                return;
+            }
+            authModal.hide();
+            fetch('/transfer', {method: 'POST', body: pendingTransferData}).then(res => {
                 if (res.ok) {
                     alert('Überweisung ausgeführt');
                     window.location.href = '/?page=balance';
@@ -158,11 +175,35 @@
                 }
             });
         }
+
         document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
             const page = params.get('page') || 'home';
             showPage(page);
+            authModal = new bootstrap.Modal(document.getElementById('authModal'));
+            authInput = document.getElementById('authCodeInput');
+            authError = document.getElementById('authError');
+            document.getElementById('authConfirmBtn').addEventListener('click', confirmAuthCode);
         });
     </script>
+
+    <div class="modal" tabindex="-1" id="authModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Authentifizierung</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Bitte geben Sie den Authentifizierungscode ein, den wir Ihnen per SMS zugeschickt haben.</p>
+            <input id="authCodeInput" type="text" class="form-control" placeholder="123456" maxlength="6">
+            <div id="authError" class="text-danger mt-2 d-none">Der Code muss aus 6 Ziffern bestehen.</div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="authConfirmBtn">Bestätigen</button>
+          </div>
+        </div>
+      </div>
+    </div>
 </body>
 </html>
