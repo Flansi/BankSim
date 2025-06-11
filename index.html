@@ -130,12 +130,19 @@
             fetch('/transfer', {method: 'POST', body: data}).then(res => {
                 if (res.ok) {
                     alert('Überweisung ausgeführt');
-                    window.location.reload();
+                    window.location.href = '/?page=balance';
                 } else {
                     alert('Fehler bei der Überweisung');
                 }
             });
         }
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const page = params.get('page');
+            if (page) {
+                showPage(page);
+            }
+        });
     </script>
 </body>
 </html>
