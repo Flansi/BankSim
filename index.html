@@ -91,23 +91,23 @@
                         <form class="row g-3" onsubmit="submitTransfer(event)">
                             <div class="col-12">
                                 <label for="recipient" class="form-label">Empfänger</label>
-                                <input id="recipient" class="form-control" type="text" placeholder="Name des Empfängers" required>
+                                <input id="recipient" name="recipient" class="form-control" type="text" placeholder="Name des Empfängers" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="iban" class="form-label">IBAN</label>
-                                <input id="iban" class="form-control" type="text" placeholder="DE00 0000 0000 0000 0000 00" required>
+                                <input id="iban" name="iban" class="form-control" type="text" placeholder="DE00 0000 0000 0000 0000 00" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="bic" class="form-label">BIC</label>
-                                <input id="bic" class="form-control" type="text" placeholder="BANKDEFFXXX" required>
+                                <input id="bic" name="bic" class="form-control" type="text" placeholder="BANKDEFFXXX" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="amount" class="form-label">Betrag in EUR</label>
-                                <input id="amount" class="form-control" type="number" step="0.01" placeholder="0,00" required>
+                                <input id="amount" name="amount" class="form-control" type="number" step="0.01" placeholder="0,00" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="purpose" class="form-label">Verwendungszweck</label>
-                                <input id="purpose" class="form-control" type="text" placeholder="Verwendungszweck">
+                                <input id="purpose" name="purpose" class="form-control" type="text" placeholder="Verwendungszweck">
                             </div>
                             <div class="col-12">
                                 <button type="submit" class="btn btn-primary w-100">Überweisen</button>
@@ -125,7 +125,16 @@
 
         function submitTransfer(event) {
             event.preventDefault();
-            alert('Überweisung ausgeführt');
+            const form = event.target;
+            const data = new FormData(form);
+            fetch('/transfer', {method: 'POST', body: data}).then(res => {
+                if (res.ok) {
+                    alert('Überweisung ausgeführt');
+                    window.location.reload();
+                } else {
+                    alert('Fehler bei der Überweisung');
+                }
+            });
         }
     </script>
 </body>

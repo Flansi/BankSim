@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import timedelta
+from datetime import timedelta, date
 
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = 'change_this_secret'
@@ -72,6 +72,38 @@ def register():
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('login'))
+
+
+@app.route('/transfer', methods=['POST'])
+def transfer():
+    """Create a new outgoing transaction for the logged in user."""
+    if 'user_id' not in session:
+        return '', 401
+
+    recipient = request.form['recipient']
+    iban = request.form['iban']
+    bic = request.form['bic']
+    amount_raw = request.form['amount']
+    purpose = request.form.get('purpose', '')
+
+    try:
+        amount = float(amount_raw)
+    except ValueError:
+        return 'Invalid amount', 400
+
+    description = f"\u00dcberweisung an {recipient}"  # "Überweisung an" with Umlaut
+    if purpose:
+        description += f": {purpose}"
+
+    txn = Transaction(
+        user_id=session['user_id'],
+        date=date.today(),
+        description=description,
+        amount=-abs(amount),
+    )
+    db.session.add(txn)
+    db.session.commit()
+    return '', 204
 
 # Routen für statische Informationsseiten
 @app.route('/karriere.html')
