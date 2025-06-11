@@ -64,7 +64,7 @@
                 case 'balance':
                     content.innerHTML = `
                         <h2>Kontostand</h2>
-                        <p>Aktueller Kontostand: <strong>1.000,00 €</strong></p>
+                        <p>Aktueller Kontostand: <strong>{{ "%.2f" % balance }} €</strong></p>
                         <h3>Buchungshistorie</h3>
                         <div class="table-responsive">
                         <table class="table table-striped">
@@ -76,56 +76,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td>01.01.2025</td><td>Fitnessstudio</td><td>-349.00 €</td></tr>
-<tr><td>02.01.2025</td><td>Strom Stadtwerke</td><td>-518.00 €</td></tr>
-<tr><td>03.01.2025</td><td>Ebay Verkauf</td><td>+2.408.00 €</td></tr>
-<tr><td>04.01.2025</td><td>Bonuszahlung</td><td>+1.201.00 €</td></tr>
-<tr><td>05.01.2025</td><td>Überweisung Max Mustermann</td><td>+1.668.00 €</td></tr>
-<tr><td>06.01.2025</td><td>Gehalt Muster AG</td><td>+486.00 €</td></tr>
-<tr><td>07.01.2025</td><td>Versicherung</td><td>-120.00 €</td></tr>
-<tr><td>08.01.2025</td><td>Versicherung</td><td>-367.00 €</td></tr>
-<tr><td>09.01.2025</td><td>Bonuszahlung</td><td>+2.553.00 €</td></tr>
-<tr><td>10.01.2025</td><td>Handyrechnung</td><td>-408.00 €</td></tr>
-<tr><td>11.01.2025</td><td>Bonuszahlung</td><td>+1.943.00 €</td></tr>
-<tr><td>12.01.2025</td><td>Barzahlung</td><td>+218.00 €</td></tr>
-<tr><td>13.01.2025</td><td>Apotheke</td><td>-54.00 €</td></tr>
-<tr><td>14.01.2025</td><td>Rückerstattung Versicherung</td><td>+1.986.00 €</td></tr>
-<tr><td>15.01.2025</td><td>Überweisung Max Mustermann</td><td>+451.00 €</td></tr>
-<tr><td>16.01.2025</td><td>Miete Wohnung</td><td>-540.00 €</td></tr>
-<tr><td>17.01.2025</td><td>Handyrechnung</td><td>-23.00 €</td></tr>
-<tr><td>18.01.2025</td><td>Strom Stadtwerke</td><td>-796.00 €</td></tr>
-<tr><td>19.01.2025</td><td>Kreditrückzahlung</td><td>+168.00 €</td></tr>
-<tr><td>20.01.2025</td><td>Streamingdienst</td><td>-843.00 €</td></tr>
-<tr><td>21.01.2025</td><td>Apotheke</td><td>-233.00 €</td></tr>
-<tr><td>22.01.2025</td><td>Handyrechnung</td><td>-337.00 €</td></tr>
-<tr><td>23.01.2025</td><td>Tankstelle</td><td>-399.00 €</td></tr>
-<tr><td>24.01.2025</td><td>Rückerstattung Versicherung</td><td>+557.00 €</td></tr>
-<tr><td>25.01.2025</td><td>Kreditrückzahlung</td><td>+2.338.00 €</td></tr>
-<tr><td>26.01.2025</td><td>Fitnessstudio</td><td>-413.00 €</td></tr>
-<tr><td>27.01.2025</td><td>Gehalt Muster AG</td><td>+2.457.00 €</td></tr>
-<tr><td>28.01.2025</td><td>Dividende BlueChip AG</td><td>+1.517.00 €</td></tr>
-<tr><td>29.01.2025</td><td>Streamingdienst</td><td>-367.00 €</td></tr>
-<tr><td>30.01.2025</td><td>Barzahlung</td><td>+2.227.00 €</td></tr>
-<tr><td>31.01.2025</td><td>Strom Stadtwerke</td><td>-220.00 €</td></tr>
-<tr><td>01.02.2025</td><td>Handyrechnung</td><td>-493.00 €</td></tr>
-<tr><td>02.02.2025</td><td>Apotheke</td><td>-388.00 €</td></tr>
-<tr><td>03.02.2025</td><td>Barzahlung</td><td>+1.589.00 €</td></tr>
-<tr><td>04.02.2025</td><td>Rückerstattung Versicherung</td><td>+1.154.00 €</td></tr>
-<tr><td>05.02.2025</td><td>Miete Wohnung</td><td>-442.00 €</td></tr>
-<tr><td>06.02.2025</td><td>Tankstelle</td><td>-388.00 €</td></tr>
-<tr><td>07.02.2025</td><td>Überweisung Max Mustermann</td><td>+2.302.00 €</td></tr>
-<tr><td>08.02.2025</td><td>Barzahlung</td><td>+2.098.00 €</td></tr>
-<tr><td>09.02.2025</td><td>Gehalt Muster AG</td><td>+2.963.00 €</td></tr>
-<tr><td>10.02.2025</td><td>Fitnessstudio</td><td>-217.00 €</td></tr>
-<tr><td>11.02.2025</td><td>Fitnessstudio</td><td>-99.00 €</td></tr>
-<tr><td>12.02.2025</td><td>Dividende BlueChip AG</td><td>+1.024.00 €</td></tr>
-<tr><td>13.02.2025</td><td>Kreditrückzahlung</td><td>+1.784.00 €</td></tr>
-<tr><td>14.02.2025</td><td>Restaurant</td><td>-159.00 €</td></tr>
-<tr><td>15.02.2025</td><td>Handyrechnung</td><td>-728.00 €</td></tr>
-<tr><td>16.02.2025</td><td>Rückerstattung Versicherung</td><td>+1.535.00 €</td></tr>
-<tr><td>17.02.2025</td><td>Online Shop</td><td>-586.00 €</td></tr>
-<tr><td>18.02.2025</td><td>Online Shop</td><td>-141.00 €</td></tr>
-<tr><td>19.02.2025</td><td>Streamingdienst</td><td>-355.00 €</td></tr>
+                            {% for t in transactions %}
+                                <tr><td>{{ t.date.strftime('%d.%m.%Y') }}</td><td>{{ t.description }}</td><td>{{ '%+.2f' % t.amount }} €</td></tr>
+                            {% endfor %}
 
                             </tbody>
                         </table>
