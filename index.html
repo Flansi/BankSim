@@ -69,7 +69,19 @@
             const content = document.getElementById('content');
             switch(page) {
                 case 'home':
-                    content.innerHTML = '<h2>Willkommen bei Wien ONline-Bank!</h2><p>Wählen Sie eine Option aus dem Menü.</p>';
+                    content.innerHTML = `
+                        <h2>Willkommen bei Wien ONline-Bank!</h2>
+                        <p>Schön, dass Sie sich eingeloggt haben. In den letzten Monaten haben wir intensiv daran gearbeitet, unseren Service für Sie noch komfortabler zu gestalten. Unsere Entwicklerinnen und Entwickler haben unzählige Stunden investiert, um Prozesse zu optimieren und neue Funktionen zu schaffen, die Ihren Alltag erleichtern sollen.</p>
+                        <p>So haben wir etwa unsere Online-Filiale erweitert und bieten Ihnen nun eine Reihe zusätzlicher Services an. Gleichzeitig wurden auch mehrere unserer Standorte modernisiert, damit Sie vor Ort ein ebenso zeitgemäßes Beratungserlebnis genießen können. Hinter den Kulissen investieren wir stetig in die Sicherheit unserer Systeme, damit Sie sich auch online jederzeit gut aufgehoben fühlen.</p>
+                        <h3>Neuigkeiten</h3>
+                        <ul>
+                            <li><strong>Neue Kreditangebote:</strong> Ab sofort können Sie besonders günstige Wohnbaufinanzierungen beantragen, die wir gemeinsam mit unseren Partnern entwickelt haben.</li>
+                            <li><strong>Modernisierte Überweisungen:</strong> Dank einer überarbeiteten Infrastruktur laufen SEPA-Überweisungen jetzt noch schneller und zuverlässiger ab.</li>
+                            <li><strong>Veranstaltungen:</strong> In Kürze finden wieder Informationsabende rund um Finanzplanung und Vorsorge in unseren Filialen statt.</li>
+                            <li><strong>Digitale Services:</strong> Unsere beliebte Mobile-App erhält demnächst ein größeres Update mit zusätzlichen Analysefunktionen.</li>
+                        </ul>
+                        <p class="mt-4"><small>Achtung: Betrüger geben sich gelegentlich als Microsoft-Mitarbeiter aus, um an persönliche Daten zu gelangen. Bitte bleiben Sie wachsam.</small></p>
+                    `;
                     break;
                 case 'balance':
                     content.innerHTML = `
@@ -148,10 +160,8 @@
         }
         document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
-            const page = params.get('page');
-            if (page) {
-                showPage(page);
-            }
+            const page = params.get('page') || 'home';
+            showPage(page);
         });
     </script>
 </body>
