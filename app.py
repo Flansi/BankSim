@@ -34,7 +34,14 @@ def dashboard():
         user = User.query.get(session['user_id'])
         transactions = Transaction.query.filter_by(user_id=user.id).order_by(Transaction.date.desc()).all()
         balance = sum(t.amount for t in transactions)
-        return render_template('index.html', transactions=transactions, balance=balance)
+        recent_transactions = transactions[:5]
+        return render_template(
+            'index.html',
+            transactions=transactions,
+            recent_transactions=recent_transactions,
+            balance=balance,
+            username=user.username,
+        )
     return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
