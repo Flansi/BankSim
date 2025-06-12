@@ -20,6 +20,12 @@ BankSim is a small banking website for **Wien ONline-Bank** built with [Flask](h
    ```
    This starts a development server on `http://127.0.0.1:80/`.
 
+5. **Run with SSL** (requires `cert.pem` and `key.pem` in the project directory):
+   ```bash
+   python run_ssl.py
+   ```
+   The server will listen on `https://127.0.0.1:443/`.
+
 On first run, a SQLite database (`database.db`) will be created automatically. You can then register a user and log in to access the pages.
 
 ## Windows Setup
