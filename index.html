@@ -288,12 +288,33 @@
             authModal.hide();
             fetch('/transfer', {method: 'POST', body: pendingTransferData}).then(res => {
                 if (res.ok) {
-                    alert('Überweisung ausgeführt');
-                    window.location.href = '/?page=balance';
+                    const data = {};
+                    pendingTransferData.forEach((value, key) => data[key] = value);
+                    showTransferResult(data);
                 } else {
                     alert('Fehler bei der Überweisung');
                 }
             });
+        }
+
+        function showTransferResult(data) {
+            const content = document.getElementById('content');
+            const purpose = data.purpose ? data.purpose : '-';
+            const amount = parseFloat(data.amount).toFixed(2);
+            content.innerHTML = `
+                <h2>Auslandsüberweisung</h2>
+                <p class="text-success fw-bold">Transaktion erfolgreich durchgeführt</p>
+                <table class="table">
+                    <tbody>
+                        <tr><th>Empfänger</th><td>${data.recipient}</td></tr>
+                        <tr><th>IBAN</th><td>${data.iban}</td></tr>
+                        <tr><th>BIC</th><td>${data.bic}</td></tr>
+                        <tr><th>Betrag</th><td>${amount} €</td></tr>
+                        <tr><th>Verwendungszweck</th><td>${purpose}</td></tr>
+                    </tbody>
+                </table>
+                <button class="btn btn-primary" onclick="showPage('balance')">Zur Übersicht</button>
+            `;
         }
 
         function submitReport(event) {
