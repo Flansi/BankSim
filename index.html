@@ -5,66 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wien ONline-Bank</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --red: #9d0000; }
+        body { font-family: "Roboto", sans-serif; }
+        header { background:#fff; border-bottom:4px solid var(--red); }
+        header nav a { color:#000; text-decoration:none; margin-right:1rem; }
+        header nav a:hover { color: var(--red); }
+        .sidebar a { display:block; padding:4px 8px; color:#000; text-decoration:none; border-radius:4px; }
+        .sidebar a:hover { background:#f3f3f3; }
+    </style>
 </head>
 <body class="bg-light">
-    <header class="bg-primary text-white text-center py-3 mb-4">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Wien ONline-Bank Logo" height="40">
+    <header class="py-2 px-4 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <img src="{{ url_for('static', filename='bawag.png') }}" alt="BAWAG Logo" style="height:40px">
+            <span id="dateTime" class="text-secondary small"></span>
+        </div>
+        <nav class="d-flex align-items-center">
+            <a href="#">Meine Finanzen</a>
+            <a href="#">Zahlungsaufträge</a>
+            <a href="#">Wertpapier</a>
+            <a href="#">Service</a>
+            <a href="#">Meine Aufträge</a>
+        </nav>
+        {% if session.get('user_id') %}
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Logout</a>
+        {% endif %}
     </header>
-    <nav class="nav justify-content-center mb-4">
-        <a class="nav-link" href="filialen.html">Filialen</a>
-        <a class="nav-link" href="mitarbeiter.html">Mitarbeiter</a>
-        <a class="nav-link" href="kundenservice.html">Kundenservice</a>
-        <a class="nav-link" href="sperrhotline.html">Sperrhotline</a>
-        <a class="nav-link" href="rechner.html">Rechner</a>
-        <a class="nav-link" href="karriere.html">Karriere</a>
-    </nav>
-    {% if not session.get('user_id') %}
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-4">
-                <div class="card p-4 mb-4">
-                    <h2 class="h4 mb-3 text-center">Login</h2>
-                    {% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
-                    <form method="post" action="{{ url_for('login', from_index=1) }}">
-                        <div class="mb-3">
-                            <input type="text" name="username" class="form-control" placeholder="Benutzername" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="password" name="password" class="form-control" placeholder="Passwort" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Einloggen</button>
-                    </form>
-                    <div class="text-center mt-2">
-                        <a href="{{ url_for('register') }}">Registrieren</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card p-4">
-                    <h2 class="h5 mb-3">Aktuelles bei Wien ONline-Bank</h2>
-                    <ul class="list-unstyled mb-0">
-                        <li><strong>Neue App-Version:</strong> Unsere mobile Banking-App wurde aktualisiert und bietet Ihnen jetzt noch mehr Komfort.</li>
-                        <li><strong>Filialeröffnung:</strong> Besuchen Sie ab Mai unsere neue Filiale am Stephansplatz.</li>
-                        <li><strong>Sicher online:</strong> Lesen Sie unsere neuesten Tipps zum Schutz vor Phishing.</li>
-                    </ul>
-                </div>
-            </div>
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <aside class="col-lg-3 col-xl-2 sidebar d-none d-lg-block">
+                <h6 class="mb-2">Meine Finanzen</h6>
+                <a href="#" onclick="showPage('home')">Finanzübersicht</a>
+                <a href="#" onclick="showPage('balance')">Umsätze</a>
+                <a href="#" onclick="showPage('notifications')">Verständigungen</a>
+                <a href="#" onclick="showPage('reportFraud')">Betrugsversuch melden</a>
+                <a href="#" onclick="showPage('dispute')">Umsatzreklamation</a>
+                <h6 class="mt-3 mb-2">Meine Favoriten</h6>
+                <a href="#" onclick="showPage('transfer')">Auslandsüberweisung</a>
+                <a href="#" onclick="showPage('standingOrder')">Dauerauftragserstellung</a>
+                <a href="#" onclick="showPage('sepaTransfer')">Inland- / Sepa Über.</a>
+                <a href="#" onclick="showPage('balance')">Umsätze</a>
+                <a href="#" onclick="showPage('limit')">Überweisungslimit</a>
+            </aside>
+            <main class="col-12 col-lg-9 col-xl-10" id="content"></main>
         </div>
     </div>
-    {% else %}
-    <div id="app" class="container d-flex">
-        <nav class="nav flex-column me-4 mb-4">
-            <a class="nav-link" href="#" onclick="showPage('home')">Home</a>
-            <a class="nav-link" href="#" onclick="showPage('balance')">Kontostand</a>
-            <a class="nav-link" href="#" onclick="showPage('transfer')">Überweisung</a>
-            <a class="nav-link" href="#" onclick="showPage('settings')">Einstellungen</a>
-            <a class="nav-link" href="{{ url_for('logout') }}">Abmelden</a>
-        </nav>
-        <div id="content" class="flex-grow-1"></div>
-    </div>
-    {% endif %}
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        function updateDateTime() {
+            const dt = document.getElementById('dateTime');
+            const now = new Date();
+            const options = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            dt.textContent = now.toLocaleString('de-AT', options);
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
         function showPage(page) {
             const content = document.getElementById('content');
             switch(page) {
@@ -94,7 +93,7 @@
                 case 'balance':
                     content.innerHTML = `
                         <h2>Kontostand</h2>
-                        <p>Aktueller Kontostand: <strong>{{ "%.2f" % balance }} €</strong></p>
+                        <p>Aktueller Kontostand: <strong>{{ "%.2f" % balance }}€</strong></p>
                         <h3>Buchungshistorie</h3>
                         <div class="table-responsive">
                         <table class="table table-striped">
@@ -145,6 +144,104 @@
                         </form>
                     `;
                     break;
+                case 'notifications':
+                    content.innerHTML = '<h2>Verständigungen</h2><p>Derzeit liegen keine neuen Verständigungen vor.</p>';
+                    break;
+                case 'reportFraud':
+                    content.innerHTML = `
+                        <h2>Betrugsversuch melden</h2>
+                        <form onsubmit="submitReport(event)">
+                            <div class="mb-3">
+                                <label for="fraudDesc" class="form-label">Beschreibung</label>
+                                <textarea id="fraudDesc" class="form-control" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Melden</button>
+                        </form>
+                    `;
+                    break;
+                case 'dispute':
+                    content.innerHTML = `
+                        <h2>Umsatzreklamation</h2>
+                        <form onsubmit="submitDispute(event)">
+                            <div class="mb-3">
+                                <label for="txInfo" class="form-label">Betroffener Umsatz</label>
+                                <input id="txInfo" class="form-control" type="text" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="disputeDesc" class="form-label">Beschreibung</label>
+                                <textarea id="disputeDesc" class="form-control" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Absenden</button>
+                        </form>
+                    `;
+                    break;
+                case 'standingOrder':
+                    content.innerHTML = `
+                        <h2>Dauerauftrag erstellen</h2>
+                        <form class="row g-3" onsubmit="submitStandingOrder(event)">
+                            <div class="col-12">
+                                <label for="soRecipient" class="form-label">Empfänger</label>
+                                <input id="soRecipient" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="soIban" class="form-label">IBAN</label>
+                                <input id="soIban" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="soAmount" class="form-label">Betrag</label>
+                                <input id="soAmount" class="form-control" type="number" step="0.01" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="soInterval" class="form-label">Intervall</label>
+                                <select id="soInterval" class="form-select">
+                                    <option>Monatlich</option>
+                                    <option>Vierteljährlich</option>
+                                    <option>Jährlich</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">Anlegen</button>
+                            </div>
+                        </form>
+                    `;
+                    break;
+                case 'sepaTransfer':
+                    content.innerHTML = `
+                        <h2>Inland- / SEPA-Überweisung</h2>
+                        <form class="row g-3" onsubmit="submitSepa(event)">
+                            <div class="col-12">
+                                <label for="sepaRecipient" class="form-label">Empfänger</label>
+                                <input id="sepaRecipient" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sepaIban" class="form-label">IBAN</label>
+                                <input id="sepaIban" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sepaAmount" class="form-label">Betrag</label>
+                                <input id="sepaAmount" class="form-control" type="number" step="0.01" required>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">Überweisen</button>
+                            </div>
+                        </form>
+                    `;
+                    break;
+                case 'limit':
+                    content.innerHTML = `
+                        <h2>Überweisungslimit</h2>
+                        <p>Aktuelles Tageslimit: <strong>5.000 €</strong></p>
+                        <form class="row g-3" onsubmit="submitLimit(event)">
+                            <div class="col-md-6">
+                                <label for="newLimit" class="form-label">Neues Limit</label>
+                                <input id="newLimit" class="form-control" type="number" step="100" required>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">Speichern</button>
+                            </div>
+                        </form>
+                    `;
+                    break;
                 case 'settings':
                     content.innerHTML = '<h2>Einstellungen</h2><p>Hier können Sie Ihre persönlichen Einstellungen vornehmen.</p>';
                     break;
@@ -182,6 +279,36 @@
                     alert('Fehler bei der Überweisung');
                 }
             });
+        }
+
+        function submitReport(event) {
+            event.preventDefault();
+            alert('Vielen Dank f\u00fcr Ihre Meldung. Wir werden sie pr\u00fcfen.');
+            showPage('home');
+        }
+
+        function submitDispute(event) {
+            event.preventDefault();
+            alert('Ihre Umsatzreklamation wurde \u00fcbermittelt.');
+            showPage('home');
+        }
+
+        function submitStandingOrder(event) {
+            event.preventDefault();
+            alert('Dauerauftrag angelegt.');
+            showPage('home');
+        }
+
+        function submitSepa(event) {
+            event.preventDefault();
+            alert('SEPA-\u00dcberweisung abgeschickt.');
+            showPage('home');
+        }
+
+        function submitLimit(event) {
+            event.preventDefault();
+            alert('Limit gespeichert.');
+            showPage('home');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
