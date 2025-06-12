@@ -18,7 +18,10 @@
 </head>
 <body class="bg-light">
     <header class="py-2 px-4 d-flex justify-content-between align-items-center">
-        <span id="dateTime" class="text-secondary small"></span>
+        <div class="d-flex align-items-center gap-2">
+            <img src="{{ url_for('static', filename='bawag.png') }}" alt="BAWAG Logo" style="height:40px">
+            <span id="dateTime" class="text-secondary small"></span>
+        </div>
         <nav class="d-flex align-items-center">
             <a href="#">Meine Finanzen</a>
             <a href="#">Zahlungsaufträge</a>
@@ -55,11 +58,11 @@
         function updateDateTime() {
             const dt = document.getElementById('dateTime');
             const now = new Date();
-            const options = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
-            dt.textContent = now.toLocaleDateString('de-AT', options);
+            const options = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            dt.textContent = now.toLocaleString('de-AT', options);
         }
         updateDateTime();
-        setInterval(updateDateTime, 60000);
+        setInterval(updateDateTime, 1000);
 
         function showPage(page) {
             const content = document.getElementById('content');
