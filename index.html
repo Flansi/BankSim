@@ -5,66 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wien ONline-Bank</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --red: #9d0000; }
+        body { font-family: "Roboto", sans-serif; }
+        header { background:#fff; border-bottom:4px solid var(--red); }
+        header nav a { color:#000; text-decoration:none; margin-right:1rem; }
+        header nav a:hover { color: var(--red); }
+        .sidebar a { display:block; padding:4px 8px; color:#000; text-decoration:none; border-radius:4px; }
+        .sidebar a:hover { background:#f3f3f3; }
+    </style>
 </head>
 <body class="bg-light">
-    <header class="bg-primary text-white text-center py-3 mb-4">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Wien ONline-Bank Logo" height="40">
+    <header class="py-2 px-4 d-flex justify-content-between align-items-center">
+        <span id="dateTime" class="text-secondary small"></span>
+        <nav class="d-flex align-items-center">
+            <a href="#">Meine Finanzen</a>
+            <a href="#">Zahlungsaufträge</a>
+            <a href="#">Wertpapier</a>
+            <a href="#">Service</a>
+            <a href="#">Meine Aufträge</a>
+        </nav>
+        {% if session.get('user_id') %}
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Logout</a>
+        {% endif %}
     </header>
-    <nav class="nav justify-content-center mb-4">
-        <a class="nav-link" href="filialen.html">Filialen</a>
-        <a class="nav-link" href="mitarbeiter.html">Mitarbeiter</a>
-        <a class="nav-link" href="kundenservice.html">Kundenservice</a>
-        <a class="nav-link" href="sperrhotline.html">Sperrhotline</a>
-        <a class="nav-link" href="rechner.html">Rechner</a>
-        <a class="nav-link" href="karriere.html">Karriere</a>
-    </nav>
-    {% if not session.get('user_id') %}
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-4">
-                <div class="card p-4 mb-4">
-                    <h2 class="h4 mb-3 text-center">Login</h2>
-                    {% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
-                    <form method="post" action="{{ url_for('login', from_index=1) }}">
-                        <div class="mb-3">
-                            <input type="text" name="username" class="form-control" placeholder="Benutzername" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="password" name="password" class="form-control" placeholder="Passwort" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Einloggen</button>
-                    </form>
-                    <div class="text-center mt-2">
-                        <a href="{{ url_for('register') }}">Registrieren</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card p-4">
-                    <h2 class="h5 mb-3">Aktuelles bei Wien ONline-Bank</h2>
-                    <ul class="list-unstyled mb-0">
-                        <li><strong>Neue App-Version:</strong> Unsere mobile Banking-App wurde aktualisiert und bietet Ihnen jetzt noch mehr Komfort.</li>
-                        <li><strong>Filialeröffnung:</strong> Besuchen Sie ab Mai unsere neue Filiale am Stephansplatz.</li>
-                        <li><strong>Sicher online:</strong> Lesen Sie unsere neuesten Tipps zum Schutz vor Phishing.</li>
-                    </ul>
-                </div>
-            </div>
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <aside class="col-lg-3 col-xl-2 sidebar d-none d-lg-block">
+                <h6 class="mb-2">Meine Finanzen</h6>
+                <a href="#" onclick="showPage('home')">Finanzübersicht</a>
+                <a href="#" onclick="showPage('balance')">Kontodetails</a>
+                <a href="#" onclick="showPage('transfer')">Überweisung</a>
+                <a href="#" onclick="showPage('settings')">Einstellungen</a>
+            </aside>
+            <main class="col-12 col-lg-9 col-xl-10" id="content"></main>
         </div>
     </div>
-    {% else %}
-    <div id="app" class="container d-flex">
-        <nav class="nav flex-column me-4 mb-4">
-            <a class="nav-link" href="#" onclick="showPage('home')">Home</a>
-            <a class="nav-link" href="#" onclick="showPage('balance')">Kontostand</a>
-            <a class="nav-link" href="#" onclick="showPage('transfer')">Überweisung</a>
-            <a class="nav-link" href="#" onclick="showPage('settings')">Einstellungen</a>
-            <a class="nav-link" href="{{ url_for('logout') }}">Abmelden</a>
-        </nav>
-        <div id="content" class="flex-grow-1"></div>
-    </div>
-    {% endif %}
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        function updateDateTime() {
+            const dt = document.getElementById('dateTime');
+            const now = new Date();
+            const options = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+            dt.textContent = now.toLocaleDateString('de-AT', options);
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+
         function showPage(page) {
             const content = document.getElementById('content');
             switch(page) {
@@ -94,7 +83,7 @@
                 case 'balance':
                     content.innerHTML = `
                         <h2>Kontostand</h2>
-                        <p>Aktueller Kontostand: <strong>{{ "%.2f" % balance }} €</strong></p>
+                        <p>Aktueller Kontostand: <strong>{{ "%.2f" % balance }}€</strong></p>
                         <h3>Buchungshistorie</h3>
                         <div class="table-responsive">
                         <table class="table table-striped">
