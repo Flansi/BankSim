@@ -46,7 +46,6 @@ def dashboard():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    from_index = request.args.get('from_index')
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -56,8 +55,6 @@ def login():
             session['user_id'] = user.id
             return redirect(url_for('dashboard'))
         error = "Ungültige Anmeldedaten"
-        if from_index:
-            return render_template('index.html', error=error)
         return render_template('login.html', error=error)
     return render_template('login.html')
 
