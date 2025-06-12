@@ -109,6 +109,36 @@ def transfer():
     db.session.commit()
     return '', 204
 
+@app.route('/sepa-transfer', methods=['POST'])
+def sepa_transfer():
+    """Create a new domestic SEPA transaction for the logged in user."""
+    if 'user_id' not in session:
+        return '', 401
+
+    recipient = request.form['recipient']
+    iban = request.form['iban']
+    amount_raw = request.form['amount']
+    purpose = request.form.get('purpose', '')
+
+    try:
+        amount = float(amount_raw)
+    except ValueError:
+        return 'Invalid amount', 400
+
+    description = f"\u00dcberweisung an {recipient}"
+    if purpose:
+        description += f": {purpose}"
+
+    txn = Transaction(
+        user_id=session['user_id'],
+        date=date.today(),
+        description=description,
+        amount=-abs(amount),
+    )
+    db.session.add(txn)
+    db.session.commit()
+    return '', 204
+
 # Routen für statische Informationsseiten
 @app.route('/karriere.html')
 def karriere_page():

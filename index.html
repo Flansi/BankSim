@@ -226,15 +226,19 @@
                         <form class="row g-3" onsubmit="submitSepa(event)">
                             <div class="col-12">
                                 <label for="sepaRecipient" class="form-label">Empfänger</label>
-                                <input id="sepaRecipient" class="form-control" required>
+                                <input id="sepaRecipient" name="recipient" class="form-control" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="sepaIban" class="form-label">IBAN</label>
-                                <input id="sepaIban" class="form-control" required>
+                                <input id="sepaIban" name="iban" class="form-control" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="sepaAmount" class="form-label">Betrag</label>
-                                <input id="sepaAmount" class="form-control" type="number" step="0.01" required>
+                                <input id="sepaAmount" name="amount" class="form-control" type="number" step="0.01" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sepaPurpose" class="form-label">Verwendungszweck</label>
+                                <input id="sepaPurpose" name="purpose" class="form-control" type="text" placeholder="Verwendungszweck">
                             </div>
                             <div class="col-12">
                                 <button type="submit" class="btn btn-primary">Überweisen</button>
@@ -266,6 +270,7 @@
         }
 
         let pendingTransferData = null;
+        let pendingTransferEndpoint = '/transfer';
         let authModal;
         let authInput;
         let authError;
@@ -274,6 +279,7 @@
             event.preventDefault();
             const form = event.target;
             pendingTransferData = new FormData(form);
+            pendingTransferEndpoint = '/transfer';
             authInput.value = '';
             authError.classList.add('d-none');
             authModal.show();
@@ -286,31 +292,38 @@
                 return;
             }
             authModal.hide();
-            fetch('/transfer', {method: 'POST', body: pendingTransferData}).then(res => {
+            fetch(pendingTransferEndpoint, {method: 'POST', body: pendingTransferData}).then(res => {
                 if (res.ok) {
                     const data = {};
                     pendingTransferData.forEach((value, key) => data[key] = value);
-                    showTransferResult(data);
+                    const type = pendingTransferEndpoint === '/transfer' ? 'foreign' : 'sepa';
+                    showTransferResult(data, type);
                 } else {
                     alert('Fehler bei der Überweisung');
                 }
             });
         }
 
-        function showTransferResult(data) {
+        function showTransferResult(data, type) {
             const content = document.getElementById('content');
             const purpose = data.purpose ? data.purpose : '-';
             const amount = parseFloat(data.amount).toFixed(2);
+            let tableRows = `
+                        <tr><th>Empfänger</th><td>${data.recipient}</td></tr>
+                        <tr><th>IBAN</th><td>${data.iban}</td></tr>`;
+            if (type === 'foreign') {
+                tableRows += `<tr><th>BIC</th><td>${data.bic}</td></tr>`;
+            }
+            tableRows += `
+                        <tr><th>Betrag</th><td>${amount} €</td></tr>
+                        <tr><th>Verwendungszweck</th><td>${purpose}</td></tr>`;
+            const heading = type === 'foreign' ? 'Auslandsüberweisung' : 'Inlandsüberweisung';
             content.innerHTML = `
-                <h2>Auslandsüberweisung</h2>
+                <h2>${heading}</h2>
                 <p class="text-success fw-bold">Transaktion erfolgreich durchgeführt</p>
                 <table class="table">
                     <tbody>
-                        <tr><th>Empfänger</th><td>${data.recipient}</td></tr>
-                        <tr><th>IBAN</th><td>${data.iban}</td></tr>
-                        <tr><th>BIC</th><td>${data.bic}</td></tr>
-                        <tr><th>Betrag</th><td>${amount} €</td></tr>
-                        <tr><th>Verwendungszweck</th><td>${purpose}</td></tr>
+                        ${tableRows}
                     </tbody>
                 </table>
                 <button class="btn btn-primary" onclick="showPage('balance')">Zur Übersicht</button>
@@ -337,8 +350,12 @@
 
         function submitSepa(event) {
             event.preventDefault();
-            alert('SEPA-\u00dcberweisung abgeschickt.');
-            showPage('home');
+            const form = event.target;
+            pendingTransferData = new FormData(form);
+            pendingTransferEndpoint = '/sepa-transfer';
+            authInput.value = '';
+            authError.classList.add('d-none');
+            authModal.show();
         }
 
         function submitLimit(event) {
