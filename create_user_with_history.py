@@ -5,14 +5,46 @@ from werkzeug.security import generate_password_hash
 
 from app import db, User, Transaction, app
 
+AUSTRIAN_FIRST_NAMES = [
+    "Anna",
+    "Johann",
+    "Franz",
+    "Katrin",
+    "Lukas",
+    "Maria",
+    "Martin",
+    "Julia",
+    "Stefan",
+    "Ingrid",
+]
+
+AUSTRIAN_LAST_NAMES = [
+    "Gruber",
+    "Huber",
+    "Bauer",
+    "M\u00fcller",
+    "Fischer",
+    "Hofer",
+    "Wagner",
+    "Berger",
+    "Schmid",
+    "Pichler",
+]
+
+
+def random_name():
+    """Return a random Austrian style full name."""
+    return f"{random.choice(AUSTRIAN_FIRST_NAMES)} {random.choice(AUSTRIAN_LAST_NAMES)}"
+
+
 INCOME_DESCRIPTIONS = [
-    "Gehalt Muster AG",
+    "Gehalt Alpen AG",
     "Bonuszahlung",
     "Dividende BlueChip AG",
-    "Überweisung Max Mustermann",
-    "Rückerstattung Versicherung",
+    "\u00dcberweisung {name}",
+    "R\u00fcckerstattung Versicherung",
     "Ebay Verkauf",
-    "Kreditrückzahlung",
+    "Kreditr\u00fcckzahlung",
     "Barzahlung",
 ]
 
@@ -27,6 +59,7 @@ EXPENSE_DESCRIPTIONS = [
     "Online Shop",
     "Restaurant",
     "Streamingdienst",
+    "\u00dcberweisung an {name}",
 ]
 
 
@@ -35,10 +68,18 @@ def generate_transactions(user_id, num=30):
     today = date.today()
     for _ in range(num):
         if random.random() < 0.4:  # income
-            desc = random.choice(INCOME_DESCRIPTIONS)
+            desc_template = random.choice(INCOME_DESCRIPTIONS)
+            if "{name}" in desc_template:
+                desc = desc_template.format(name=random_name())
+            else:
+                desc = desc_template
             amount = round(random.uniform(100, 3000), 2)
         else:
-            desc = random.choice(EXPENSE_DESCRIPTIONS)
+            desc_template = random.choice(EXPENSE_DESCRIPTIONS)
+            if "{name}" in desc_template:
+                desc = desc_template.format(name=random_name())
+            else:
+                desc = desc_template
             amount = -round(random.uniform(10, 1000), 2)
         days_ago = random.randint(0, 60)
         txn_date = today - timedelta(days=days_ago)
