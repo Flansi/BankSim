@@ -46,6 +46,23 @@ def delete_user(listbox):
                 refresh_users(listbox)
 
 
+def change_password(listbox):
+    selection = listbox.curselection()
+    if not selection:
+        return
+    item = listbox.get(selection[0])
+    user_id = int(item.split(":", 1)[0])
+    new_pw = simpledialog.askstring("Passwort ändern", "Neues Passwort eingeben:", show='*')
+    if not new_pw:
+        return
+    with app.app_context():
+        user = User.query.get(user_id)
+        if user:
+            user.password = generate_password_hash(new_pw)
+            db.session.commit()
+            messagebox.showinfo("Erfolg", f"Passwort für {user.username} aktualisiert")
+
+
 def show_transactions(user_id):
     txn_win = tk.Toplevel()
     txn_win.title("Transaktionen")
@@ -120,6 +137,7 @@ def main():
     tk.Button(btn_frame, text="Neu", command=lambda: add_user(user_list)).pack(side=tk.LEFT)
     tk.Button(btn_frame, text="Löschen", command=lambda: delete_user(user_list)).pack(side=tk.LEFT)
     tk.Button(btn_frame, text="Transaktionen", command=lambda: view_transactions(user_list)).pack(side=tk.LEFT)
+    tk.Button(btn_frame, text="Passwort ändern", command=lambda: change_password(user_list)).pack(side=tk.LEFT)
 
     refresh_users(user_list)
     root.mainloop()
