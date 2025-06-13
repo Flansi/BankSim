@@ -10,6 +10,11 @@ def random_iban():
     return "AT" + "".join(str(random.randint(0, 9)) for _ in range(18))
 
 
+def random_account_number():
+    """Return a random 10-digit account number."""
+    return "".join(str(random.randint(0, 9)) for _ in range(10))
+
+
 PURPOSES = [
     "Miete Wohnung",
     "Lebensmitteleinkauf",
@@ -133,7 +138,12 @@ def main():
         if User.query.filter_by(username=username).first():
             print("Benutzer existiert bereits")
             return
-        user = User(username=username, password=generate_password_hash(password))
+        user = User(
+            username=username,
+            password=generate_password_hash(password),
+            account_number=random_account_number(),
+            account_iban=random_iban(),
+        )
         db.session.add(user)
         db.session.commit()
         txns = generate_transactions(user.id, random.randint(20, 50))

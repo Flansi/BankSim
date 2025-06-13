@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta, date
+import random
 
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = 'change_this_secret'
@@ -11,10 +12,22 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
 
 db = SQLAlchemy(app)
 
+
+def random_account_number():
+    """Return a random 10-digit account number."""
+    return "".join(str(random.randint(0, 9)) for _ in range(10))
+
+
+def random_iban():
+    """Return a random Austrian IBAN starting with AT."""
+    return "AT" + "".join(str(random.randint(0, 9)) for _ in range(18))
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
+    account_number = db.Column(db.String(20))
+    account_iban = db.Column(db.String(34))
 
 
 class Transaction(db.Model):
@@ -45,12 +58,16 @@ def dashboard():
         )
         balance = sum(t.amount for t in transactions)
         recent_transactions = transactions[:5]
+        account_number = user.account_number or random_account_number()
+        account_iban = user.account_iban or random_iban()
         return render_template(
             'index.html',
             transactions=transactions,
             recent_transactions=recent_transactions,
             balance=balance,
             username=user.username,
+            account_number=account_number,
+            account_iban=account_iban,
         )
     return redirect(url_for('login'))
 
