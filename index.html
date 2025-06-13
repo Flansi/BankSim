@@ -86,6 +86,8 @@
                 case 'home':
                     content.innerHTML = `
                         <h2>Willkommen zurück, {{ username }}!</h2>
+                        <p><strong>Kontonummer:</strong> {{ account_number }}<br>
+                        <strong>IBAN:</strong> {{ account_iban }}</p>
                         <p>Aktueller Kontostand: <strong>{{ "%.2f" % balance }}€</strong></p>
                         <h3>Letzte Transaktionen</h3>
                         <div class="table-responsive">
