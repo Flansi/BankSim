@@ -172,7 +172,20 @@
                     `;
                     break;
                 case 'notifications':
-                    content.innerHTML = '<h2>Verständigungen</h2><p>Derzeit liegen keine neuen Verständigungen vor.</p>';
+                    content.innerHTML = `
+                        <h2>Verständigungen</h2>
+                        <h3>Hinweis zu Online-Betrug</h3>
+                        <p>Online-Betrug tritt in vielen Formen auf. Betrüger versuchen immer wieder, \u00fcber E-Mails, Telefon oder gef\u00e4lschte Webseiten an pers\u00f6nliche Daten oder Geld zu gelangen.</p>
+                        <p>Besonders verbreitet sind sogenannte <strong>Technische Support Scams</strong>. Dabei geben sich Kriminelle oft als Mitarbeitende gro\u00dfer Softwareunternehmen aus und behaupten, der Computer des Opfers sei angeblich mit Viren infiziert oder weise Fehlfunktionen auf.</p>
+                        <p>Im Verlauf eines solchen Gespr\u00e4chs wird h\u00e4ufig dazu gedr\u00e4ngt, eine Fernwartungssoftware zu installieren, damit sich der angebliche Support-Mitarbeiter verbinden kann. Seri\u00f6se Unternehmen wie Microsoft w\u00fcrden jedoch niemals unaufgefordert dazu auffordern, eine solche Software zu installieren oder sich auf diese Weise Zugriff auf Ihren PC zu verschaffen.</p>
+                        <p>Typischer Ablauf eines Tech-Support-Betrugs:</p>
+                        <ol>
+                            <li>Das Opfer erh\u00e4lt einen Anruf, eine E-Mail oder sieht ein Pop-up-Fenster, das vor angeblichen Problemen mit dem Computer warnt.</li>
+                            <li>Der angebliche Techniker fordert dazu auf, eine Fernwartungssoftware wie TeamViewer oder AnyDesk zu installieren.</li>
+                            <li>Nach der Verbindung versucht der Betr\u00fcger, Zugriff auf sensible Daten zu erlangen oder f\u00fcr angebliche Reparaturen Geld zu verlangen.</li>
+                        </ol>
+                        <p>Beenden Sie solche Anrufe sofort und geben Sie niemals vertrauliche Informationen preis. Sollten Sie unsicher sein, kontaktieren Sie den offiziellen Kundendienst des betreffenden Unternehmens \u00fcber die bekannten Kan\u00e4le.</p>
+                    `;
                     break;
                 case 'reportFraud':
                     content.innerHTML = `
