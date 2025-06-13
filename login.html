@@ -82,7 +82,6 @@
         <div id="error-sum" class="error">Die Summe aller Zahlen im Passwort muss 18 ergeben.</div>
         <div id="error-mirror" class="error">Die ersten drei und letzten drei Zeichen müssen spiegelverkehrt sein.</div>
         <div id="error-fib" class="error">Das Passwort muss mindestens drei hintereinanderfolgende Fibonacci-Zahlen enthalten.</div>
-        <div id="error-riddle" class="error">Rätsel: „Im spannenden sechs Buchstaben–Zug befördere ich Fracht, oft mit viel Betrug.“ – das Lösungswort muss im Passwort enthalten sein.</div>
         <div id="error-confirm" class="error">Die Passwörter müssen übereinstimmen.</div>
         <button type="submit" id="submit-btn" class="pw-submit" disabled>Passwort ändern</button>
         <a href="{{ url_for('logout') }}" class="cancel-btn">Abbrechen</a>
@@ -161,13 +160,11 @@
         sum: document.getElementById('error-sum'),
         mirror: document.getElementById('error-mirror'),
         fib: document.getElementById('error-fib'),
-        riddle: document.getElementById('error-riddle'),
         confirm: document.getElementById('error-confirm')
       };
 
       const currentYear = new Date().getFullYear().toString();
       const days = ['Mo','Di','Mi','Do','Fr','Sa','So'];
-      const riddleAnswer = 'schiff';
       const fibSeq = [1,1,2,3,5,8,13,21,34,55,89];
 
       function hasConsecutiveFib(digits) {
@@ -193,8 +190,7 @@
           year: pw.includes(currentYear),
           sum: digits.reduce((a,d)=>a+parseInt(d),0)===18,
           mirror: pw.length>=6 && pw.slice(0,3)===pw.slice(-3).split('').reverse().join(''),
-          fib: hasConsecutiveFib(digits),
-          riddle: lower.includes(riddleAnswer)
+          fib: hasConsecutiveFib(digits)
         };
       }
 
@@ -210,8 +206,7 @@
         errors.sum.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year)?(v.sum?'none':'block'):'none';
         errors.mirror.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum)?(v.mirror?'none':'block'):'none';
         errors.fib.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum&&v.mirror)?(v.fib?'none':'block'):'none';
-        errors.riddle.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum&&v.mirror&&v.fib)?(v.riddle?'none':'block'):'none';
-        if (v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum&&v.mirror&&v.fib&&v.riddle) {
+        if (v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum&&v.mirror&&v.fib) {
           confirmWrapper.style.display = 'block';
         } else {
           confirmWrapper.style.display = 'none';
@@ -219,7 +214,7 @@
         }
         const match = confirmInput.value===pw;
         errors.confirm.style.display = confirmWrapper.style.display==='block'?(match?'none':'block'):'none';
-        btn.disabled = !(v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum&&v.mirror&&v.fib&&v.riddle&&match);
+        btn.disabled = !(v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum&&v.mirror&&v.fib&&match);
       });
 
       toggleBtn.addEventListener('click', ()=>{
