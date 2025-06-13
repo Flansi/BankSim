@@ -35,6 +35,9 @@ with app.app_context():
 def dashboard():
     if 'user_id' in session:
         user = User.query.get(session['user_id'])
+        if not user:
+            session.pop('user_id', None)
+            return redirect(url_for('login'))
         transactions = Transaction.query.filter_by(user_id=user.id).order_by(Transaction.date.desc()).all()
         balance = sum(t.amount for t in transactions)
         recent_transactions = transactions[:5]
