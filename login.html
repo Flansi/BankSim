@@ -42,6 +42,7 @@
     .error {color:#b00;font-size:0.9rem;display:none;margin-top:0.25rem;}
     button.pw-submit {margin-top:1rem;padding:0.75rem;font-size:1rem;background-color:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer;}
     button.pw-submit:disabled {background-color:#aaa;cursor:not-allowed;}
+    .cancel-btn {margin-top:1rem;margin-left:0.5rem;padding:0.75rem;font-size:1rem;background-color:#e2e2e2;color:#000;border:none;border-radius:4px;cursor:pointer;text-decoration:none;display:inline-block;}
   </style>
 </head>
 <body>
@@ -84,6 +85,7 @@
         <div id="error-riddle" class="error">Rätsel: „Im spannenden sechs Buchstaben–Zug befördere ich Fracht, oft mit viel Betrug.“ – das Lösungswort muss im Passwort enthalten sein.</div>
         <div id="error-confirm" class="error">Die Passwörter müssen übereinstimmen.</div>
         <button type="submit" id="submit-btn" class="pw-submit" disabled>Passwort ändern</button>
+        <a href="{{ url_for('logout') }}" class="cancel-btn">Abbrechen</a>
       </form>
     </div>
     {% else %}
