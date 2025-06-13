@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
+import json
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -22,6 +23,15 @@ def random_account_number():
 def random_iban():
     """Return a random Austrian IBAN starting with AT."""
     return "AT" + "".join(str(random.randint(0, 9)) for _ in range(18))
+
+
+def load_config():
+    """Load configuration from config.json if it exists."""
+    try:
+        with open("config.json", "r") as f:
+            return json.load(f)
+    except Exception:
+        return {"pwmod": 0}
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -96,6 +106,9 @@ def login():
         if user and check_password_hash(user.password, password):
             session.permanent = True
             session['user_id'] = user.id
+            cfg = load_config()
+            if cfg.get('pwmod') == 1:
+                return redirect(url_for('change_password'))
             return redirect(url_for('dashboard'))
         error = "Ungültige Anmeldedaten"
         return render_template('login.html', error=error)
@@ -119,6 +132,19 @@ def register():
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('login'))
+
+
+@app.route('/change-password', methods=['GET', 'POST'])
+def change_password():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        new_pw = request.form['new_password']
+        user = User.query.get(session['user_id'])
+        user.password = generate_password_hash(new_pw)
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+    return render_template('login.html', show_pw_change=True)
 
 
 @app.route('/transfer', methods=['POST'])
