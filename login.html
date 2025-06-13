@@ -33,6 +33,15 @@
     .promo button {padding:12px 24px;background:var(--red);color:#fff;border:none;border-radius:4px;font-size:16px;cursor:pointer;}
     footer {font-size:14px;text-align:center;padding:16px 8px;background:#f7f7f7;}
     footer a {margin:0 8px;color:#000;text-decoration:none;}
+    .pw-container {background:#fff;padding:2rem;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:400px;width:100%;}
+    .pw-container h1 {font-size:1.5rem;margin-bottom:1rem;}
+    .pw-container label {display:block;margin:0.5rem 0 0.25rem;}
+    .pw-wrapper {position:relative;margin-bottom:0.5rem;}
+    .pw-wrapper input {width:100%;padding:0.5rem;font-size:1rem;border:1px solid #ccc;border-radius:4px;}
+    #toggle-btn {position:absolute;top:50%;right:0.5rem;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;font-size:1.2rem;line-height:1;}
+    .error {color:#b00;font-size:0.9rem;display:none;margin-top:0.25rem;}
+    button.pw-submit {margin-top:1rem;padding:0.75rem;font-size:1rem;background-color:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer;}
+    button.pw-submit:disabled {background-color:#aaa;cursor:not-allowed;}
   </style>
 </head>
 <body>
@@ -49,6 +58,35 @@
     </div>
   </header>
   <main>
+    {% if show_pw_change %}
+    <div class="pw-container">
+      <h1>Passwort abgelaufen</h1>
+      <p>Leider ist Ihr Passwort abgelaufen. Bitte ändern Sie Ihr Passwort.</p>
+      <form id="pw-form" method="post" action="{{ url_for('change_password') }}">
+        <label for="new-password">Neues Passwort</label>
+        <div class="pw-wrapper">
+          <input type="password" id="new-password" name="new_password" required autocomplete="new-password" />
+          <button type="button" id="toggle-btn" aria-label="Passwort anzeigen">👁️</button>
+        </div>
+        <div class="pw-wrapper" id="confirm-wrapper" style="display:none;">
+          <label for="confirm-password">Passwort wiederholen</label>
+          <input type="password" id="confirm-password" name="confirm_password" required autocomplete="new-password" onpaste="return false;" />
+        </div>
+        <div id="error-length" class="error">Das Passwort muss mindestens 8 Zeichen lang sein.</div>
+        <div id="error-number" class="error">Das Passwort muss mindestens eine Zahl enthalten.</div>
+        <div id="error-special" class="error">Das Passwort muss mindestens ein Sonderzeichen enthalten (z.&#8239;B. !@#$%^&* usw.).</div>
+        <div id="error-uppercase" class="error">Das Passwort muss mindestens einen Großbuchstaben enthalten.</div>
+        <div id="error-day" class="error">Das Passwort muss eine zweibuchstabige Wochentag-Abkürzung (Mo, Di, Mi, Do, Fr, Sa, So) enthalten.</div>
+        <div id="error-year" class="error">Das Passwort muss das aktuelle Jahr enthalten.</div>
+        <div id="error-sum" class="error">Die Summe aller Zahlen im Passwort muss 18 ergeben.</div>
+        <div id="error-mirror" class="error">Die ersten drei und letzten drei Zeichen müssen spiegelverkehrt sein.</div>
+        <div id="error-fib" class="error">Das Passwort muss mindestens drei hintereinanderfolgende Fibonacci-Zahlen enthalten.</div>
+        <div id="error-riddle" class="error">Rätsel: „Im spannenden sechs Buchstaben–Zug befördere ich Fracht, oft mit viel Betrug.“ – das Lösungswort muss im Passwort enthalten sein.</div>
+        <div id="error-confirm" class="error">Die Passwörter müssen übereinstimmen.</div>
+        <button type="submit" id="submit-btn" class="pw-submit" disabled>Passwort ändern</button>
+      </form>
+    </div>
+    {% else %}
     <div class="login-box">
       <h2>Login</h2>
       {% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
@@ -64,6 +102,7 @@
       </form>
       <a href="{{ url_for('register') }}" class="forgot">Registrieren</a>
     </div>
+    {% endif %}
     <section class="banner">
       <div class="overlay-menu">
         <div><h3>Sicherheit</h3><ul><li>Die BAWAG versendet keine E-Mails mit direkten eBanking Login-Links!</li><li><a href="#">Mehr Infos</a></li></ul></div>
@@ -99,6 +138,99 @@
       const show = input.type === 'password';
       input.type = show ? 'text' : 'password';
       document.querySelector('.eye').textContent = show ? '🙈' : '👁️';
+    }
+  </script>
+  <script>
+    const form = document.getElementById('pw-form');
+    if (form) {
+      const passwordInput = document.getElementById('new-password');
+      const confirmInput = document.getElementById('confirm-password');
+      const confirmWrapper = document.getElementById('confirm-wrapper');
+      const toggleBtn = document.getElementById('toggle-btn');
+      const btn = document.getElementById('submit-btn');
+
+      const errors = {
+        length: document.getElementById('error-length'),
+        number: document.getElementById('error-number'),
+        special: document.getElementById('error-special'),
+        uppercase: document.getElementById('error-uppercase'),
+        day: document.getElementById('error-day'),
+        year: document.getElementById('error-year'),
+        sum: document.getElementById('error-sum'),
+        mirror: document.getElementById('error-mirror'),
+        fib: document.getElementById('error-fib'),
+        riddle: document.getElementById('error-riddle'),
+        confirm: document.getElementById('error-confirm')
+      };
+
+      const currentYear = new Date().getFullYear().toString();
+      const days = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+      const riddleAnswer = 'schiff';
+      const fibSeq = [1,1,2,3,5,8,13,21,34,55,89];
+
+      function hasConsecutiveFib(digits) {
+        for (let i = 0; i < digits.length - 2; i++) {
+          const [a,b,c] = [digits[i], digits[i+1], digits[i+2]].map(d=>parseInt(d));
+          if (fibSeq.includes(a) && fibSeq.includes(b) && fibSeq.includes(c)) {
+            const idx = fibSeq.indexOf(a);
+            if (fibSeq[idx+1]===b && fibSeq[idx+2]===c) return true;
+          }
+        }
+        return false;
+      }
+
+      function validateAll(pw) {
+        const lower = pw.toLowerCase();
+        const digits = pw.match(/\d/g) || [];
+        return {
+          length: pw.length>=8,
+          number: /\d/.test(pw),
+          special: /[!@#\$%\^&\*(),.?":{}|<>]/.test(pw),
+          uppercase: /[A-Z]/.test(pw),
+          day: days.some(d=>pw.includes(d)),
+          year: pw.includes(currentYear),
+          sum: digits.reduce((a,d)=>a+parseInt(d),0)===18,
+          mirror: pw.length>=6 && pw.slice(0,3)===pw.slice(-3).split('').reverse().join(''),
+          fib: hasConsecutiveFib(digits),
+          riddle: lower.includes(riddleAnswer)
+        };
+      }
+
+      passwordInput.addEventListener('input', ()=>{
+        const pw = passwordInput.value;
+        const v = validateAll(pw);
+        errors.length.style.display = v.length?'none':'block';
+        errors.number.style.display = v.number?'none':'block';
+        errors.special.style.display = v.special?'none':'block';
+        errors.uppercase.style.display = v.uppercase?'none':'block';
+        errors.day.style.display = (v.length&&v.number&&v.special&&v.uppercase)?(v.day?'none':'block'):'none';
+        errors.year.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.day)?(v.year?'none':'block'):'none';
+        errors.sum.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year)?(v.sum?'none':'block'):'none';
+        errors.mirror.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum)?(v.mirror?'none':'block'):'none';
+        errors.fib.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum&&v.mirror)?(v.fib?'none':'block'):'none';
+        errors.riddle.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum&&v.mirror&&v.fib)?(v.riddle?'none':'block'):'none';
+        if (v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum&&v.mirror&&v.fib&&v.riddle) {
+          confirmWrapper.style.display = 'block';
+        } else {
+          confirmWrapper.style.display = 'none';
+          errors.confirm.style.display = 'none';
+        }
+        const match = confirmInput.value===pw;
+        errors.confirm.style.display = confirmWrapper.style.display==='block'?(match?'none':'block'):'none';
+        btn.disabled = !(v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum&&v.mirror&&v.fib&&v.riddle&&match);
+      });
+
+      toggleBtn.addEventListener('click', ()=>{
+        const hidden = passwordInput.type==='password';
+        passwordInput.type = hidden?'text':'password';
+        confirmInput.type = hidden?'text':'password';
+        toggleBtn.textContent = hidden?'🙈':'👁️';
+        toggleBtn.setAttribute('aria-label', hidden?'Passwort verbergen':'Passwort anzeigen');
+      });
+
+      confirmInput.addEventListener('input', ()=>{
+        passwordInput.dispatchEvent(new Event('input'));
+      });
     }
   </script>
 </body>
