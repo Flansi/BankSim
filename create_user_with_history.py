@@ -5,6 +5,28 @@ from werkzeug.security import generate_password_hash
 
 from app import db, User, Transaction, app
 
+# Length of an Austrian IBAN is 20 characters: 'AT' followed by 18 digits
+def random_iban():
+    return "AT" + "".join(str(random.randint(0, 9)) for _ in range(18))
+
+
+PURPOSES = [
+    "Miete Wohnung",
+    "Lebensmitteleinkauf",
+    "Stromrechnung",
+    "Internetgebühr",
+    "Handyrechnung",
+    "Gehalt",
+    "Bonus",
+    "Steuererstattung",
+    "Kreditrate",
+    "Restaurantbesuch",
+    "Online Einkauf",
+    "Geschenk {name}",
+    "Mitgliedsbeitrag",
+    "Spende",
+]
+
 AUSTRIAN_FIRST_NAMES = [
     "Anna",
     "Johann",
@@ -83,7 +105,24 @@ def generate_transactions(user_id, num=30):
             amount = -round(random.uniform(10, 1000), 2)
         days_ago = random.randint(0, 60)
         txn_date = today - timedelta(days=days_ago)
-        transactions.append(Transaction(user_id=user_id, date=txn_date, description=desc, amount=amount))
+
+        purpose_template = random.choice(PURPOSES)
+        if "{name}" in purpose_template:
+            purpose = purpose_template.format(name=random_name())
+        else:
+            purpose = purpose_template
+
+        transactions.append(
+            Transaction(
+                user_id=user_id,
+                date=txn_date,
+                description=desc,
+                amount=amount,
+                iban=random_iban(),
+                bic="n.A",
+                purpose=purpose,
+            )
+        )
     return transactions
 
 
