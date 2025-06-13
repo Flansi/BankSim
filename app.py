@@ -43,6 +43,21 @@ class Transaction(db.Model):
 
 with app.app_context():
     db.create_all()
+    inspector = db.inspect(db.engine)
+    cols = {c["name"] for c in inspector.get_columns("user")}
+    added = False
+    if "account_number" not in cols:
+        db.session.execute(
+            "ALTER TABLE user ADD COLUMN account_number VARCHAR(20)"
+        )
+        added = True
+    if "account_iban" not in cols:
+        db.session.execute(
+            "ALTER TABLE user ADD COLUMN account_iban VARCHAR(34)"
+        )
+        added = True
+    if added:
+        db.session.commit()
 
 @app.route('/')
 def dashboard():
