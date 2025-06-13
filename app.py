@@ -38,7 +38,11 @@ def dashboard():
         if not user:
             session.pop('user_id', None)
             return redirect(url_for('login'))
-        transactions = Transaction.query.filter_by(user_id=user.id).order_by(Transaction.date.desc()).all()
+        transactions = (
+            Transaction.query.filter_by(user_id=user.id)
+            .order_by(Transaction.date.desc(), Transaction.id.desc())
+            .all()
+        )
         balance = sum(t.amount for t in transactions)
         recent_transactions = transactions[:5]
         return render_template(
