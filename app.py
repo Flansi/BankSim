@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta, date
 import random
@@ -48,12 +49,12 @@ with app.app_context():
     added = False
     if "account_number" not in cols:
         db.session.execute(
-            "ALTER TABLE user ADD COLUMN account_number VARCHAR(20)"
+            text("ALTER TABLE user ADD COLUMN account_number VARCHAR(20)")
         )
         added = True
     if "account_iban" not in cols:
         db.session.execute(
-            "ALTER TABLE user ADD COLUMN account_iban VARCHAR(34)"
+            text("ALTER TABLE user ADD COLUMN account_iban VARCHAR(34)")
         )
         added = True
     if added:
