@@ -23,6 +23,9 @@ class Transaction(db.Model):
     date = db.Column(db.Date, nullable=False)
     description = db.Column(db.String(200), nullable=False)
     amount = db.Column(db.Float, nullable=False)
+    iban = db.Column(db.String(34))
+    bic = db.Column(db.String(11))
+    purpose = db.Column(db.String(200))
     user = db.relationship('User', backref=db.backref('transactions', lazy=True))
 
 with app.app_context():
@@ -104,6 +107,9 @@ def transfer():
         date=date.today(),
         description=description,
         amount=-abs(amount),
+        iban=iban,
+        bic=bic,
+        purpose=purpose,
     )
     db.session.add(txn)
     db.session.commit()
@@ -134,6 +140,8 @@ def sepa_transfer():
         date=date.today(),
         description=description,
         amount=-abs(amount),
+        iban=iban,
+        purpose=purpose,
     )
     db.session.add(txn)
     db.session.commit()

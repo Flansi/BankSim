@@ -29,6 +29,7 @@
             border-color: var(--red);
             box-shadow: 0 0 0 0.25rem rgba(157, 0, 0, 0.25);
         }
+        .tx-row { cursor: pointer; }
     </style>
 </head>
 <body class="bg-light">
@@ -121,7 +122,18 @@
                             </thead>
                             <tbody>
                             {% for t in transactions %}
-                                <tr><td>{{ t.date.strftime('%d.%m.%Y') }}</td><td>{{ t.description }}</td><td>{{ '%+.2f' % t.amount }} €</td></tr>
+                                <tr class="tx-row" onclick="toggleDetails(this)"><td>{{ t.date.strftime('%d.%m.%Y') }}</td><td>{{ t.description }}</td><td>{{ '%+.2f' % t.amount }} €</td></tr>
+                                {% if t.iban or t.bic or t.purpose %}
+                                <tr class="tx-details d-none">
+                                    <td colspan="3">
+                                        <ul class="list-unstyled mb-0">
+                                            {% if t.iban %}<li><strong>IBAN:</strong> {{ t.iban }}</li>{% endif %}
+                                            {% if t.bic %}<li><strong>BIC:</strong> {{ t.bic }}</li>{% endif %}
+                                            {% if t.purpose %}<li><strong>Verwendungszweck:</strong> {{ t.purpose }}</li>{% endif %}
+                                        </ul>
+                                    </td>
+                                </tr>
+                                {% endif %}
                             {% endfor %}
 
                             </tbody>
@@ -328,6 +340,13 @@
                 </table>
                 <button class="btn btn-primary" onclick="showPage('balance')">Zur Übersicht</button>
             `;
+        }
+
+        function toggleDetails(row) {
+            const next = row.nextElementSibling;
+            if (next && next.classList.contains('tx-details')) {
+                next.classList.toggle('d-none');
+            }
         }
 
         function submitReport(event) {
