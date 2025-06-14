@@ -1,8 +1,43 @@
 import tkinter as tk
 from tkinter import simpledialog, messagebox
-from app import app, db, User, Transaction
+from app import app, db, User, Transaction, random_iban
 from werkzeug.security import generate_password_hash
 from datetime import date
+import random
+
+# Simple helpers to create random values for BIC and purpose
+LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+def random_bic():
+    """Return a random 8 character BIC starting with letters and country AT."""
+    return (
+        "".join(random.choice(LETTERS) for _ in range(4))
+        + "AT"
+        + "".join(random.choice(LETTERS + "0123456789") for _ in range(2))
+    )
+
+PURPOSES = [
+    "Miete Wohnung",
+    "Lebensmitteleinkauf",
+    "Stromrechnung",
+    "Internetgebühr",
+    "Handyrechnung",
+    "Gehalt",
+    "Bonus",
+    "Steuererstattung",
+    "Kreditrate",
+    "Restaurantbesuch",
+    "Online Einkauf",
+    "Geschenk {name}",
+    "Mitgliedsbeitrag",
+    "Spende",
+]
+
+def random_purpose():
+    template = random.choice(PURPOSES)
+    if "{name}" in template:
+        return template.format(name="Max")
+    return template
 
 
 def refresh_users(listbox):
@@ -74,7 +109,14 @@ def show_transactions(user_id):
         with app.app_context():
             txns = Transaction.query.filter_by(user_id=user_id).order_by(Transaction.date).all()
             for t in txns:
-                listbox.insert(tk.END, f"{t.id}: {t.date} {t.description} {t.amount}")
+                info = f"{t.id}: {t.date} {t.description} {t.amount}"
+                if t.iban:
+                    info += f" IBAN:{t.iban}"
+                if t.bic:
+                    info += f" BIC:{t.bic}"
+                if t.purpose:
+                    info += f" Zweck:{t.purpose}"
+                listbox.insert(tk.END, info)
 
     def add_tx():
         desc = simpledialog.askstring("Beschreibung", "Beschreibung der Transaktion:")
@@ -88,8 +130,40 @@ def show_transactions(user_id):
         except ValueError:
             messagebox.showerror("Fehler", "Ungültiger Betrag")
             return
+        iban = simpledialog.askstring(
+            "IBAN",
+            "IBAN eingeben (leer für Zufall):",
+        )
+        if iban is None:
+            return
+        if not iban:
+            iban = random_iban()
+        bic = simpledialog.askstring(
+            "BIC",
+            "BIC eingeben (leer für Zufall):",
+        )
+        if bic is None:
+            return
+        if not bic:
+            bic = random_bic()
+        purpose = simpledialog.askstring(
+            "Verwendungszweck",
+            "Verwendungszweck eingeben (leer für Zufall):",
+        )
+        if purpose is None:
+            return
+        if not purpose:
+            purpose = random_purpose()
         with app.app_context():
-            txn = Transaction(user_id=user_id, date=date.today(), description=desc, amount=amount)
+            txn = Transaction(
+                user_id=user_id,
+                date=date.today(),
+                description=desc,
+                amount=amount,
+                iban=iban,
+                bic=bic,
+                purpose=purpose,
+            )
             db.session.add(txn)
             db.session.commit()
         refresh_tx()
@@ -107,10 +181,75 @@ def show_transactions(user_id):
                 db.session.commit()
                 refresh_tx()
 
+    def edit_tx():
+        sel = listbox.curselection()
+        if not sel:
+            return
+        item = listbox.get(sel[0])
+        txn_id = int(item.split(":", 1)[0])
+        with app.app_context():
+            txn = Transaction.query.get(txn_id)
+            if not txn:
+                return
+            desc = simpledialog.askstring(
+                "Beschreibung",
+                "Beschreibung der Transaktion:",
+                initialvalue=txn.description,
+            )
+            if desc is None:
+                return
+            amount_str = simpledialog.askstring(
+                "Betrag",
+                "Betrag eingeben:",
+                initialvalue=str(txn.amount),
+            )
+            if amount_str is None:
+                return
+            try:
+                amount = float(amount_str)
+            except ValueError:
+                messagebox.showerror("Fehler", "Ungültiger Betrag")
+                return
+            iban = simpledialog.askstring(
+                "IBAN",
+                "IBAN eingeben (leer für Zufall):",
+                initialvalue=txn.iban or "",
+            )
+            if iban is None:
+                return
+            if not iban:
+                iban = random_iban()
+            bic = simpledialog.askstring(
+                "BIC",
+                "BIC eingeben (leer für Zufall):",
+                initialvalue=txn.bic or "",
+            )
+            if bic is None:
+                return
+            if not bic:
+                bic = random_bic()
+            purpose = simpledialog.askstring(
+                "Verwendungszweck",
+                "Verwendungszweck eingeben (leer für Zufall):",
+                initialvalue=txn.purpose or "",
+            )
+            if purpose is None:
+                return
+            if not purpose:
+                purpose = random_purpose()
+            txn.description = desc
+            txn.amount = amount
+            txn.iban = iban
+            txn.bic = bic
+            txn.purpose = purpose
+            db.session.commit()
+            refresh_tx()
+
     btn_frame = tk.Frame(txn_win)
     btn_frame.pack(fill=tk.X)
     tk.Button(btn_frame, text="Neu", command=add_tx).pack(side=tk.LEFT)
     tk.Button(btn_frame, text="Löschen", command=delete_tx).pack(side=tk.LEFT)
+    tk.Button(btn_frame, text="Bearbeiten", command=edit_tx).pack(side=tk.LEFT)
 
     refresh_tx()
     txn_win.mainloop()
