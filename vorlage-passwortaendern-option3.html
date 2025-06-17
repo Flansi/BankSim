@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Passwort abgelaufen</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .container { background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 420px; width: 100%; }
+    h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+    label { display: block; margin: 0.5rem 0 0.25rem; }
+    .pw-wrapper { position: relative; margin-bottom: 0.5rem; }
+    .pw-wrapper input { width: 100%; padding: 0.5rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px; }
+    #toggle-btn { position: absolute; top: 50%; right: 0.5rem; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; font-size: 1.2rem; line-height: 1; }
+    .error { color: #b00; font-size: 0.9rem; display: none; margin-top: 0.25rem; }
+    button[type="submit"] { margin-top: 1rem; padding: 0.75rem; font-size: 1rem; background-color: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+    button:disabled { background-color: #aaa; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Passwort abgelaufen</h1>
+    <p>Leider ist Ihr Passwort abgelaufen. Bitte ändern Sie Ihr Passwort.</p>
+    <form id="pw-form">
+      <label for="new-password">Neues Passwort</label>
+      <div class="pw-wrapper">
+        <input type="password" id="new-password" required autocomplete="new-password">
+        <button type="button" id="toggle-btn" aria-label="Passwort anzeigen">👁️</button>
+      </div>
+      <div class="pw-wrapper" id="confirm-wrapper" style="display:none;">
+        <label for="confirm-password">Passwort wiederholen</label>
+        <input type="password" id="confirm-password" required autocomplete="new-password" onpaste="return false;">
+      </div>
+      <!-- Fehlermeldungen Grundregeln -->
+      <div id="err-length" class="error">Das Passwort muss mindestens 8 Zeichen lang sein.</div>
+      <div id="err-number" class="error">Das Passwort muss mindestens eine Zahl enthalten.</div>
+      <div id="err-special" class="error">Das Passwort muss mindestens ein Sonderzeichen enthalten (z. B. !@#$%^&*).</div>
+      <div id="err-upper" class="error">Das Passwort muss mindestens einen Großbuchstaben enthalten.</div>
+      <!-- Neue Regeln (leicht → schwer) -->
+      <div id="err-country" class="error">Das Passwort muss ein Länderkürzel enthalten.</div>
+      <div id="err-dna" class="error">Das Passwort muss ein 3‑Zeichen-DNA‑Codon enthalten.</div>
+      <div id="err-sum42" class="error">Die Summe aller Zahlen im Passwort muss 42 ergeben.</div>
+      <div id="err-euler" class="error">Das Passwort muss einen Tastatur‑Pfad (Eulerpfad, mind. 6 Zeichen, nicht „qwertz“) enthalten.</div>
+      <div id="err-roman" class="error">Die als römische Zahl interpretierten Buchstaben müssen insgesamt 100 ergeben (I=1, V=5, X=10, L=50, C=100).</div>
+      <div id="err-confirm" class="error">Die Passwörter müssen übereinstimmen.</div>
+      <button type="submit" id="submit-btn" disabled>Passwort ändern</button>
+    </form>
+  </div>
+
+  <script>
+    const pwInput   = document.getElementById('new-password');
+    const confInput = document.getElementById('confirm-password');
+    const confWrap  = document.getElementById('confirm-wrapper');
+    const toggleBtn = document.getElementById('toggle-btn');
+    const submitBtn = document.getElementById('submit-btn');
+
+    const errs = {
+      length:  document.getElementById('err-length'),
+      number:  document.getElementById('err-number'),
+      special: document.getElementById('err-special'),
+      upper:   document.getElementById('err-upper'),
+      country: document.getElementById('err-country'),
+      dna:     document.getElementById('err-dna'),
+      sum42:   document.getElementById('err-sum42'),
+      euler:   document.getElementById('err-euler'),
+      roman:   document.getElementById('err-roman'),
+      confirm: document.getElementById('err-confirm')
+    };
+
+    // ISO‑3166‑1 alpha‑2 Codes
+    const countryCodes = ["DE","AT","CH","US","GB","FR","IT","ES","CN","JP","IN","BR","CA","AU","RU","SE","NO","DK","NL","BE","PL","CZ","HU","GR","PT","FI","IE","MX","KR","ZA"];
+
+    // All 64 codons
+    const codons = (()=>{
+      const bases=['A','T','G','C'];
+      const arr=[];
+      bases.forEach(a=>bases.forEach(b=>bases.forEach(c=>arr.push(a+b+c))));
+      return arr;
+    })();
+
+    // Keyboard rows
+    const rows = ['qwertzuiop','asdfghjkl','yxcvbnm'];
+
+    const romanVals = {I:1,V:5,X:10,L:50,C:100};
+
+    function sumDigits(str){return (str.match(/\d/g)||[]).reduce((s,d)=>s+Number(d),0);}
+
+    function hasCountry(pw){
+      const upper=pw.toUpperCase();
+      return countryCodes.some(cc=>upper.includes(cc));
+    }
+
+    function hasCodon(pw){
+      const upper=pw.toUpperCase();
+      return codons.some(c=>upper.includes(c));
+    }
+
+    function hasEulerPath(pw){
+      const low=pw.toLowerCase();
+      for(const row of rows){
+        for(let len=6;len<=row.length;len++){
+          for(let i=0;i+len<=row.length;i++){
+            const sub=row.slice(i,i+len);
+            if(sub!=='qwertz' && low.includes(sub)) return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    function romanSum(pw){
+      return pw.toUpperCase().split('').reduce((s,ch)=>s+(romanVals[ch]||0),0);
+    }
+
+    function validate(){
+      const pw = pwInput.value;
+      const basic = {
+        length: pw.length>=8,
+        number: /\d/.test(pw),
+        special:/[!@#\$%\^&\*(),.?":{}|<>]/.test(pw),
+        upper:/[A-Z]/.test(pw)
+      };
+      errs.length.style.display  = basic.length?'none':'block';
+      errs.number.style.display  = basic.number?'none':'block';
+      errs.special.style.display = basic.special?'none':'block';
+      errs.upper.style.display   = basic.upper?'none':'block';
+
+      const step1 = basic.length&&basic.number&&basic.special&&basic.upper;
+      errs.country.style.display = step1 ? (hasCountry(pw)?'none':'block') : 'none';
+
+      const step2 = step1 && hasCountry(pw);
+      errs.dna.style.display     = step2 ? (hasCodon(pw)?'none':'block') : 'none';
+
+      const step3 = step2 && hasCodon(pw);
+      errs.sum42.style.display   = step3 ? (sumDigits(pw)===42?'none':'block') : 'none';
+
+      const step4 = step3 && sumDigits(pw)===42;
+      errs.euler.style.display   = step4 ? (hasEulerPath(pw)?'none':'block') : 'none';
+
+      const step5 = step4 && hasEulerPath(pw);
+      errs.roman.style.display   = step5 ? (romanSum(pw)===100?'none':'block') : 'none';
+
+      const allPass = step5 && romanSum(pw)===100;
+
+      if(allPass){
+        confWrap.style.display='block';
+      }else{
+        confWrap.style.display='none';
+        errs.confirm.style.display='none';
+      }
+
+      const match = confInput.value===pw;
+      errs.confirm.style.display = confWrap.style.display==='block' ? (match?'none':'block') : 'none';
+      submitBtn.disabled = !(allPass && match);
+    }
+
+    pwInput.addEventListener('input', validate);
+    confInput.addEventListener('input', validate);
+
+    toggleBtn.addEventListener('click',()=>{
+      const hidden=pwInput.type==='password';
+      pwInput.type=hidden?'text':'password';
+      confInput.type=hidden?'text':'password';
+      toggleBtn.textContent=hidden?'🙈':'👁️';
+      toggleBtn.setAttribute('aria-label',hidden?'Passwort verbergen':'Passwort anzeigen');
+    });
+
+    document.getElementById('pw-form').addEventListener('submit',e=>{
+      e.preventDefault();
+      alert('Ihr Passwort wurde erfolgreich geändert.');
+      e.target.reset();
+      confWrap.style.display='none';
+      errs.confirm.style.display='none';
+      submitBtn.disabled=true;
+      pwInput.type='password';
+      toggleBtn.textContent='👁️';
+    });
+  </script>
+</body>
+</html>
