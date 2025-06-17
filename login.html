@@ -60,33 +60,63 @@
   </header>
   <main>
     {% if show_pw_change %}
-    <div class="pw-container">
-      <h1>Passwort abgelaufen</h1>
-      <p>Leider ist Ihr Passwort abgelaufen. Bitte ändern Sie Ihr Passwort.</p>
-      <form id="pw-form" method="post" action="{{ url_for('change_password') }}">
-        <label for="new-password">Neues Passwort</label>
-        <div class="pw-wrapper">
-          <input type="password" id="new-password" name="new_password" required autocomplete="new-password" />
-          <button type="button" id="toggle-btn" aria-label="Passwort anzeigen">👁️</button>
-        </div>
-        <div class="pw-wrapper" id="confirm-wrapper" style="display:none;">
-          <label for="confirm-password">Passwort wiederholen</label>
-          <input type="password" id="confirm-password" name="confirm_password" required autocomplete="new-password" onpaste="return false;" />
-        </div>
-        <div id="error-length" class="error">Das Passwort muss mindestens 8 Zeichen lang sein.</div>
-        <div id="error-number" class="error">Das Passwort muss mindestens eine Zahl enthalten.</div>
-        <div id="error-special" class="error">Das Passwort muss mindestens ein Sonderzeichen enthalten (z.&#8239;B. !@#$%^&* usw.).</div>
-        <div id="error-uppercase" class="error">Das Passwort muss mindestens einen Großbuchstaben enthalten.</div>
-        <div id="error-day" class="error">Das Passwort muss eine zweibuchstabige Wochentag-Abkürzung (Mo, Di, Mi, Do, Fr, Sa, So) enthalten.</div>
-        <div id="error-year" class="error">Das Passwort muss das aktuelle Jahr enthalten.</div>
-        <div id="error-sum" class="error">Die Summe aller Zahlen im Passwort muss 18 ergeben.</div>
-        <div id="error-mirror" class="error">Die ersten drei und letzten drei Zeichen müssen spiegelverkehrt sein.</div>
-        <div id="error-fib" class="error">Das Passwort muss mindestens drei hintereinanderfolgende Fibonacci-Zahlen enthalten.</div>
-        <div id="error-confirm" class="error">Die Passwörter müssen übereinstimmen.</div>
-        <button type="submit" id="submit-btn" class="pw-submit" disabled>Passwort ändern</button>
-        <a href="{{ url_for('logout') }}" class="cancel-btn">Abbrechen</a>
-      </form>
-    </div>
+      {% if pwmod == 2 %}
+      <div class="pw-container">
+        <h1>Passwort abgelaufen</h1>
+        <p>Leider ist Ihr Passwort abgelaufen. Bitte ändern Sie Ihr Passwort.</p>
+        <form id="pw-form" method="post" action="{{ url_for('change_password') }}">
+          <label for="new-password">Neues Passwort</label>
+          <div class="pw-wrapper">
+            <input type="password" id="new-password" name="new_password" required autocomplete="new-password">
+            <button type="button" id="toggle-btn" aria-label="Passwort anzeigen">👁️</button>
+          </div>
+          <div class="pw-wrapper" id="confirm-wrapper" style="display:none;">
+            <label for="confirm-password">Passwort wiederholen</label>
+            <input type="password" id="confirm-password" name="confirm_password" required autocomplete="new-password" onpaste="return false;">
+          </div>
+          <div id="error-length" class="error">Das Passwort muss mindestens 8 Zeichen lang sein.</div>
+          <div id="error-number" class="error">Das Passwort muss mindestens eine Zahl enthalten.</div>
+          <div id="error-special" class="error">Das Passwort muss mindestens ein Sonderzeichen enthalten (z. B. !@#$%^&* usw.).</div>
+          <div id="error-uppercase" class="error">Das Passwort muss mindestens einen Großbuchstaben enthalten.</div>
+          <div id="error-element" class="error">Das Passwort muss das Kürzel eines chemischen Edelgases enthalten.</div>
+          <div id="error-moon" class="error">Das Passwort muss den mythologischen Namen eines Jupitermondes enthalten.</div>
+          <div id="error-prime" class="error">Die Gesamtlänge des Passworts muss eine Primzahl sein.</div>
+          <div id="error-palindrome" class="error">Mindestens 5 Zeichen im Passwort müssen ein Palindrom bilden.</div>
+          <div id="error-ascii" class="error">Das Passwort muss ein kleines ASCII-Art-Substring enthalten (z. B. ":-)" oder "<3").</div>
+          <div id="error-confirm" class="error">Die Passwörter müssen übereinstimmen.</div>
+          <button type="submit" id="submit-btn" class="pw-submit" disabled>Passwort ändern</button>
+          <a href="{{ url_for('logout') }}" class="cancel-btn">Abbrechen</a>
+        </form>
+      </div>
+      {% else %}
+      <div class="pw-container">
+        <h1>Passwort abgelaufen</h1>
+        <p>Leider ist Ihr Passwort abgelaufen. Bitte ändern Sie Ihr Passwort.</p>
+        <form id="pw-form" method="post" action="{{ url_for('change_password') }}">
+          <label for="new-password">Neues Passwort</label>
+          <div class="pw-wrapper">
+            <input type="password" id="new-password" name="new_password" required autocomplete="new-password" />
+            <button type="button" id="toggle-btn" aria-label="Passwort anzeigen">👁️</button>
+          </div>
+          <div class="pw-wrapper" id="confirm-wrapper" style="display:none;">
+            <label for="confirm-password">Passwort wiederholen</label>
+            <input type="password" id="confirm-password" name="confirm_password" required autocomplete="new-password" onpaste="return false;" />
+          </div>
+          <div id="error-length" class="error">Das Passwort muss mindestens 8 Zeichen lang sein.</div>
+          <div id="error-number" class="error">Das Passwort muss mindestens eine Zahl enthalten.</div>
+          <div id="error-special" class="error">Das Passwort muss mindestens ein Sonderzeichen enthalten (z. B. !@#$%^&* usw.).</div>
+          <div id="error-uppercase" class="error">Das Passwort muss mindestens einen Großbuchstaben enthalten.</div>
+          <div id="error-day" class="error">Das Passwort muss eine zweibuchstabige Wochentag-Abkürzung (Mo, Di, Mi, Do, Fr, Sa, So) enthalten.</div>
+          <div id="error-year" class="error">Das Passwort muss das aktuelle Jahr enthalten.</div>
+          <div id="error-sum" class="error">Die Summe aller Zahlen im Passwort muss 18 ergeben.</div>
+          <div id="error-mirror" class="error">Die ersten drei und letzten drei Zeichen müssen spiegelverkehrt sein.</div>
+          <div id="error-fib" class="error">Das Passwort muss mindestens drei hintereinanderfolgende Fibonacci-Zahlen enthalten.</div>
+          <div id="error-confirm" class="error">Die Passwörter müssen übereinstimmen.</div>
+          <button type="submit" id="submit-btn" class="pw-submit" disabled>Passwort ändern</button>
+          <a href="{{ url_for('logout') }}" class="cancel-btn">Abbrechen</a>
+        </form>
+      </div>
+      {% endif %}
     {% else %}
     <div class="login-box">
       <h2>Login</h2>
@@ -141,7 +171,8 @@
       document.querySelector('.eye').textContent = show ? '🙈' : '👁️';
     }
   </script>
-  <script>
+{% if show_pw_change and pwmod == 1 %}
+<script>
     const form = document.getElementById('pw-form');
     if (form) {
       const passwordInput = document.getElementById('new-password');
@@ -229,6 +260,105 @@
         passwordInput.dispatchEvent(new Event('input'));
       });
     }
-  </script>
+</script>
+{% elif show_pw_change and pwmod == 2 %}
+<script>
+    const passwordInput = document.getElementById('new-password');
+    const confirmInput = document.getElementById('confirm-password');
+    const confirmWrapper = document.getElementById('confirm-wrapper');
+    const toggleBtn = document.getElementById('toggle-btn');
+    const btn = document.getElementById('submit-btn');
+
+    const errors = {
+      length: document.getElementById('error-length'),
+      number: document.getElementById('error-number'),
+      special: document.getElementById('error-special'),
+      uppercase: document.getElementById('error-uppercase'),
+      element: document.getElementById('error-element'),
+      moon: document.getElementById('error-moon'),
+      prime: document.getElementById('error-prime'),
+      palindrome: document.getElementById('error-palindrome'),
+      ascii: document.getElementById('error-ascii'),
+      confirm: document.getElementById('error-confirm')
+    };
+
+    const elements = ['He','Ne','Ar','Kr','Xe','Rn','Og'];
+    const moons = ['Adrastea','Aitne','Amalthea','Ananke','Aoede','Arche','Autonoe','Callirrhoe','Callisto','Carme','Carpo','Chaldene','Cyllene','Dia','Eirene','Elara','Erinome','Ersa','Euanthe','Eukelade','Eupheme','Euporie','Europa','Eurydome','Ganymede','Harpalyke','Hegemone','Helike','Hermippe','Herse','Himalia','Io','Iocaste','Isonoe','Kale','Kallichore','Kalyke','Kore','Leda','Lysithea','Megaclite','Metis','Mneme','Orthosie','Pandia','Pasiphae','Pasithee','Philophrosyne','Praxidike','Sinope','Sponde','Taygete','Thebe','Thelxinoe','Themisto','Thyone','Valetudo'];
+
+    function isPrime(n) {
+      if (n < 2) return false;
+      for (let i = 2; i <= Math.sqrt(n); i++) if (n % i === 0) return false;
+      return true;
+    }
+
+    function hasPalindrome(pw) {
+      for (let len = 5; len <= pw.length; len++) {
+        for (let i = 0; i + len <= pw.length; i++) {
+          const sub = pw.slice(i, i+len);
+          if (sub === sub.split('').reverse().join('')) return true;
+        }
+      }
+      return false;
+    }
+
+    function hasAsciiArt(pw) {
+      const emoticons = [':-)', ':)', ':D', '<3'];
+      return emoticons.some(e => pw.includes(e));
+    }
+
+    function validateAll(pw) {
+      const digits = pw.match(/\d/g) || [];
+      return {
+        length: pw.length>=8,
+        number: /\d/.test(pw),
+        special: /[!@#\$%\^&\*(),.?":{}|<>]/.test(pw),
+        uppercase: /[A-Z]/.test(pw),
+        element: elements.some(e => pw.includes(e)),
+        moon: moons.some(m => pw.includes(m)),
+        prime: isPrime(pw.length),
+        palindrome: hasPalindrome(pw),
+        ascii: hasAsciiArt(pw)
+      };
+    }
+
+    passwordInput.addEventListener('input', () => {
+      const pw = passwordInput.value;
+      const v = validateAll(pw);
+      errors.length.style.display = v.length ? 'none' : 'block';
+      errors.number.style.display = v.number ? 'none' : 'block';
+      errors.special.style.display = v.special ? 'none' : 'block';
+      errors.uppercase.style.display = v.uppercase ? 'none' : 'block';
+
+      errors.element.style.display = (v.length&&v.number&&v.special&&v.uppercase) ? (v.element ? 'none' : 'block') : 'none';
+      errors.moon.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.element) ? (v.moon ? 'none' : 'block') : 'none';
+      errors.prime.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.element&&v.moon) ? (v.prime ? 'none' : 'block') : 'none';
+      errors.palindrome.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.element&&v.moon&&v.prime) ? (v.palindrome ? 'none' : 'block') : 'none';
+      errors.ascii.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.element&&v.moon&&v.prime&&v.palindrome) ? (v.ascii ? 'none' : 'block') : 'none';
+
+      if (v.length&&v.number&&v.special&&v.uppercase&&v.element&&v.moon&&v.prime&&v.palindrome&&v.ascii) {
+        confirmWrapper.style.display = 'block';
+      } else {
+        confirmWrapper.style.display = 'none';
+        errors.confirm.style.display = 'none';
+      }
+
+      const match = confirmInput.value === pw;
+      errors.confirm.style.display = confirmWrapper.style.display === 'block' ? (match ? 'none' : 'block') : 'none';
+      btn.disabled = !(v.length&&v.number&&v.special&&v.uppercase&&v.element&&v.moon&&v.prime&&v.palindrome&&v.ascii&&match);
+    });
+
+    toggleBtn.addEventListener('click', () => {
+      const hidden = passwordInput.type==='password';
+      passwordInput.type = hidden ? 'text' : 'password';
+      confirmInput.type = hidden ? 'text' : 'password';
+      toggleBtn.textContent = hidden ? '🙈' : '👁️';
+      toggleBtn.setAttribute('aria-label', hidden ? 'Passwort verbergen' : 'Passwort anzeigen');
+    });
+
+    confirmInput.addEventListener('input', () => {
+      passwordInput.dispatchEvent(new Event('input'));
+    });
+</script>
+{% endif %}
 </body>
 </html>

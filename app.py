@@ -107,7 +107,7 @@ def login():
             session.permanent = True
             session['user_id'] = user.id
             cfg = load_config()
-            if cfg.get('pwmod') == 1:
+            if cfg.get('pwmod') in (1, 2):
                 return redirect(url_for('change_password'))
             return redirect(url_for('dashboard'))
         error = "Ungültige Anmeldedaten"
@@ -138,13 +138,17 @@ def logout():
 def change_password():
     if 'user_id' not in session:
         return redirect(url_for('login'))
+    cfg = load_config()
+    pwmod = cfg.get('pwmod', 0)
+    if pwmod == 0:
+        return redirect(url_for('dashboard'))
     if request.method == 'POST':
         new_pw = request.form['new_password']
         user = User.query.get(session['user_id'])
         user.password = generate_password_hash(new_pw)
         db.session.commit()
         return redirect(url_for('dashboard'))
-    return render_template('login.html', show_pw_change=True)
+    return render_template('login.html', show_pw_change=True, pwmod=pwmod)
 
 
 @app.route('/transfer', methods=['POST'])
