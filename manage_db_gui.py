@@ -154,10 +154,24 @@ def show_transactions(user_id):
             return
         if not purpose:
             purpose = random_purpose()
+        date_str = simpledialog.askstring(
+            "Datum",
+            "Datum eingeben (YYYY-MM-DD, leer für heute):",
+        )
+        if date_str is None:
+            return
+        if date_str:
+            try:
+                txn_date = date.fromisoformat(date_str)
+            except ValueError:
+                messagebox.showerror("Fehler", "Ungültiges Datum")
+                return
+        else:
+            txn_date = date.today()
         with app.app_context():
             txn = Transaction(
                 user_id=user_id,
-                date=date.today(),
+                date=txn_date,
                 description=desc,
                 amount=amount,
                 iban=iban,
@@ -237,11 +251,27 @@ def show_transactions(user_id):
                 return
             if not purpose:
                 purpose = random_purpose()
+            date_str = simpledialog.askstring(
+                "Datum",
+                "Datum eingeben (YYYY-MM-DD, leer für unverändert):",
+                initialvalue=str(txn.date),
+            )
+            if date_str is None:
+                return
+            if date_str:
+                try:
+                    txn_date = date.fromisoformat(date_str)
+                except ValueError:
+                    messagebox.showerror("Fehler", "Ungültiges Datum")
+                    return
+            else:
+                txn_date = txn.date
             txn.description = desc
             txn.amount = amount
             txn.iban = iban
             txn.bic = bic
             txn.purpose = purpose
+            txn.date = txn_date
             db.session.commit()
             refresh_tx()
 
