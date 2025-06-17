@@ -107,7 +107,7 @@ def login():
             session.permanent = True
             session['user_id'] = user.id
             cfg = load_config()
-            if cfg.get('pwmod') in (1, 2):
+            if cfg.get('pwmod') in (1, 2, 3):
                 return redirect(url_for('change_password'))
             return redirect(url_for('dashboard'))
         error = "Ungültige Anmeldedaten"
