@@ -165,16 +165,7 @@
       toggleBtn.setAttribute('aria-label',hidden?'Passwort verbergen':'Passwort anzeigen');
     });
 
-    document.getElementById('pw-form').addEventListener('submit',e=>{
-      e.preventDefault();
-      alert('Ihr Passwort wurde erfolgreich geändert.');
-      e.target.reset();
-      confWrap.style.display='none';
-      errs.confirm.style.display='none';
-      submitBtn.disabled=true;
-      pwInput.type='password';
-      toggleBtn.textContent='👁️';
-    });
+    // Submit the form normally so the server can update the password
   </script>
 </body>
 </html>
