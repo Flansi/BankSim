@@ -1,8 +1,43 @@
 import tkinter as tk
 from tkinter import simpledialog, messagebox
-from app import app, db, User, Transaction
+from app import app, db, User, Transaction, random_iban
 from werkzeug.security import generate_password_hash
 from datetime import date
+import random
+
+# Simple helpers to create random values for BIC and purpose
+LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+def random_bic():
+    """Return a random 8 character BIC starting with letters and country AT."""
+    return (
+        "".join(random.choice(LETTERS) for _ in range(4))
+        + "AT"
+        + "".join(random.choice(LETTERS + "0123456789") for _ in range(2))
+    )
+
+PURPOSES = [
+    "Miete Wohnung",
+    "Lebensmitteleinkauf",
+    "Stromrechnung",
+    "Internetgebühr",
+    "Handyrechnung",
+    "Gehalt",
+    "Bonus",
+    "Steuererstattung",
+    "Kreditrate",
+    "Restaurantbesuch",
+    "Online Einkauf",
+    "Geschenk {name}",
+    "Mitgliedsbeitrag",
+    "Spende",
+]
+
+def random_purpose():
+    template = random.choice(PURPOSES)
+    if "{name}" in template:
+        return template.format(name="Max")
+    return template
 
 
 def refresh_users(listbox):
@@ -46,6 +81,23 @@ def delete_user(listbox):
                 refresh_users(listbox)
 
 
+def change_password(listbox):
+    selection = listbox.curselection()
+    if not selection:
+        return
+    item = listbox.get(selection[0])
+    user_id = int(item.split(":", 1)[0])
+    new_pw = simpledialog.askstring("Passwort ändern", "Neues Passwort eingeben:", show='*')
+    if not new_pw:
+        return
+    with app.app_context():
+        user = User.query.get(user_id)
+        if user:
+            user.password = generate_password_hash(new_pw)
+            db.session.commit()
+            messagebox.showinfo("Erfolg", f"Passwort für {user.username} aktualisiert")
+
+
 def show_transactions(user_id):
     txn_win = tk.Toplevel()
     txn_win.title("Transaktionen")
@@ -57,7 +109,14 @@ def show_transactions(user_id):
         with app.app_context():
             txns = Transaction.query.filter_by(user_id=user_id).order_by(Transaction.date).all()
             for t in txns:
-                listbox.insert(tk.END, f"{t.id}: {t.date} {t.description} {t.amount}")
+                info = f"{t.id}: {t.date} {t.description} {t.amount}"
+                if t.iban:
+                    info += f" IBAN:{t.iban}"
+                if t.bic:
+                    info += f" BIC:{t.bic}"
+                if t.purpose:
+                    info += f" Zweck:{t.purpose}"
+                listbox.insert(tk.END, info)
 
     def add_tx():
         desc = simpledialog.askstring("Beschreibung", "Beschreibung der Transaktion:")
@@ -71,8 +130,54 @@ def show_transactions(user_id):
         except ValueError:
             messagebox.showerror("Fehler", "Ungültiger Betrag")
             return
+        iban = simpledialog.askstring(
+            "IBAN",
+            "IBAN eingeben (leer für Zufall):",
+        )
+        if iban is None:
+            return
+        if not iban:
+            iban = random_iban()
+        bic = simpledialog.askstring(
+            "BIC",
+            "BIC eingeben (leer für Zufall):",
+        )
+        if bic is None:
+            return
+        if not bic:
+            bic = random_bic()
+        purpose = simpledialog.askstring(
+            "Verwendungszweck",
+            "Verwendungszweck eingeben (leer für Zufall):",
+        )
+        if purpose is None:
+            return
+        if not purpose:
+            purpose = random_purpose()
+        date_str = simpledialog.askstring(
+            "Datum",
+            "Datum eingeben (YYYY-MM-DD, leer für heute):",
+        )
+        if date_str is None:
+            return
+        if date_str:
+            try:
+                txn_date = date.fromisoformat(date_str)
+            except ValueError:
+                messagebox.showerror("Fehler", "Ungültiges Datum")
+                return
+        else:
+            txn_date = date.today()
         with app.app_context():
-            txn = Transaction(user_id=user_id, date=date.today(), description=desc, amount=amount)
+            txn = Transaction(
+                user_id=user_id,
+                date=txn_date,
+                description=desc,
+                amount=amount,
+                iban=iban,
+                bic=bic,
+                purpose=purpose,
+            )
             db.session.add(txn)
             db.session.commit()
         refresh_tx()
@@ -90,10 +195,91 @@ def show_transactions(user_id):
                 db.session.commit()
                 refresh_tx()
 
+    def edit_tx():
+        sel = listbox.curselection()
+        if not sel:
+            return
+        item = listbox.get(sel[0])
+        txn_id = int(item.split(":", 1)[0])
+        with app.app_context():
+            txn = Transaction.query.get(txn_id)
+            if not txn:
+                return
+            desc = simpledialog.askstring(
+                "Beschreibung",
+                "Beschreibung der Transaktion:",
+                initialvalue=txn.description,
+            )
+            if desc is None:
+                return
+            amount_str = simpledialog.askstring(
+                "Betrag",
+                "Betrag eingeben:",
+                initialvalue=str(txn.amount),
+            )
+            if amount_str is None:
+                return
+            try:
+                amount = float(amount_str)
+            except ValueError:
+                messagebox.showerror("Fehler", "Ungültiger Betrag")
+                return
+            iban = simpledialog.askstring(
+                "IBAN",
+                "IBAN eingeben (leer für Zufall):",
+                initialvalue=txn.iban or "",
+            )
+            if iban is None:
+                return
+            if not iban:
+                iban = random_iban()
+            bic = simpledialog.askstring(
+                "BIC",
+                "BIC eingeben (leer für Zufall):",
+                initialvalue=txn.bic or "",
+            )
+            if bic is None:
+                return
+            if not bic:
+                bic = random_bic()
+            purpose = simpledialog.askstring(
+                "Verwendungszweck",
+                "Verwendungszweck eingeben (leer für Zufall):",
+                initialvalue=txn.purpose or "",
+            )
+            if purpose is None:
+                return
+            if not purpose:
+                purpose = random_purpose()
+            date_str = simpledialog.askstring(
+                "Datum",
+                "Datum eingeben (YYYY-MM-DD, leer für unverändert):",
+                initialvalue=str(txn.date),
+            )
+            if date_str is None:
+                return
+            if date_str:
+                try:
+                    txn_date = date.fromisoformat(date_str)
+                except ValueError:
+                    messagebox.showerror("Fehler", "Ungültiges Datum")
+                    return
+            else:
+                txn_date = txn.date
+            txn.description = desc
+            txn.amount = amount
+            txn.iban = iban
+            txn.bic = bic
+            txn.purpose = purpose
+            txn.date = txn_date
+            db.session.commit()
+            refresh_tx()
+
     btn_frame = tk.Frame(txn_win)
     btn_frame.pack(fill=tk.X)
     tk.Button(btn_frame, text="Neu", command=add_tx).pack(side=tk.LEFT)
     tk.Button(btn_frame, text="Löschen", command=delete_tx).pack(side=tk.LEFT)
+    tk.Button(btn_frame, text="Bearbeiten", command=edit_tx).pack(side=tk.LEFT)
 
     refresh_tx()
     txn_win.mainloop()
@@ -120,6 +306,7 @@ def main():
     tk.Button(btn_frame, text="Neu", command=lambda: add_user(user_list)).pack(side=tk.LEFT)
     tk.Button(btn_frame, text="Löschen", command=lambda: delete_user(user_list)).pack(side=tk.LEFT)
     tk.Button(btn_frame, text="Transaktionen", command=lambda: view_transactions(user_list)).pack(side=tk.LEFT)
+    tk.Button(btn_frame, text="Passwort ändern", command=lambda: change_password(user_list)).pack(side=tk.LEFT)
 
     refresh_users(user_list)
     root.mainloop()

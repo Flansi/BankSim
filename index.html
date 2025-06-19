@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wien ONline-Bank</title>
+    <title>Bawag | Das ist Bank</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -14,6 +14,22 @@
         header nav a:hover { color: var(--red); }
         .sidebar a { display:block; padding:4px 8px; color:#000; text-decoration:none; border-radius:4px; }
         .sidebar a:hover { background:#f3f3f3; }
+        .btn-primary {
+            background-color: var(--red);
+            border-color: var(--red);
+        }
+        .btn-primary:hover,
+        .btn-primary:focus,
+        .btn-primary:active {
+            background-color: #7d0000;
+            border-color: #7d0000;
+            box-shadow: none;
+        }
+        .form-control:focus {
+            border-color: var(--red);
+            box-shadow: 0 0 0 0.25rem rgba(157, 0, 0, 0.25);
+        }
+        .tx-row { cursor: pointer; }
     </style>
 </head>
 <body class="bg-light">
@@ -70,6 +86,8 @@
                 case 'home':
                     content.innerHTML = `
                         <h2>Willkommen zurück, {{ username }}!</h2>
+                        <p><strong>Kontonummer:</strong> {{ account_number }}<br>
+                        <strong>IBAN:</strong> {{ account_iban }}</p>
                         <p>Aktueller Kontostand: <strong>{{ "%.2f" % balance }}€</strong></p>
                         <h3>Letzte Transaktionen</h3>
                         <div class="table-responsive">
@@ -106,7 +124,18 @@
                             </thead>
                             <tbody>
                             {% for t in transactions %}
-                                <tr><td>{{ t.date.strftime('%d.%m.%Y') }}</td><td>{{ t.description }}</td><td>{{ '%+.2f' % t.amount }} €</td></tr>
+                                <tr class="tx-row" onclick="toggleDetails(this)"><td>{{ t.date.strftime('%d.%m.%Y') }}</td><td>{{ t.description }}</td><td>{{ '%+.2f' % t.amount }} €</td></tr>
+                                {% if t.iban or t.bic or t.purpose %}
+                                <tr class="tx-details d-none">
+                                    <td colspan="3">
+                                        <ul class="list-unstyled mb-0">
+                                            {% if t.iban %}<li><strong>IBAN:</strong> {{ t.iban }}</li>{% endif %}
+                                            {% if t.bic %}<li><strong>BIC:</strong> {{ t.bic }}</li>{% endif %}
+                                            {% if t.purpose %}<li><strong>Verwendungszweck:</strong> {{ t.purpose }}</li>{% endif %}
+                                        </ul>
+                                    </td>
+                                </tr>
+                                {% endif %}
                             {% endfor %}
 
                             </tbody>
@@ -145,7 +174,20 @@
                     `;
                     break;
                 case 'notifications':
-                    content.innerHTML = '<h2>Verständigungen</h2><p>Derzeit liegen keine neuen Verständigungen vor.</p>';
+                    content.innerHTML = `
+                        <h2>Verständigungen</h2>
+                        <h3>Hinweis zu Online-Betrug</h3>
+                        <p>Online-Betrug tritt in vielen Formen auf. Betrüger versuchen immer wieder, \u00fcber E-Mails, Telefon oder gef\u00e4lschte Webseiten an pers\u00f6nliche Daten oder Geld zu gelangen.</p>
+                        <p>Besonders verbreitet sind sogenannte <strong>Technische Support Scams</strong>. Dabei geben sich Kriminelle oft als Mitarbeitende gro\u00dfer Softwareunternehmen aus und behaupten, der Computer des Opfers sei angeblich mit Viren infiziert oder weise Fehlfunktionen auf.</p>
+                        <p>Im Verlauf eines solchen Gespr\u00e4chs wird h\u00e4ufig dazu gedr\u00e4ngt, eine Fernwartungssoftware zu installieren, damit sich der angebliche Support-Mitarbeiter verbinden kann. Seri\u00f6se Unternehmen wie Microsoft w\u00fcrden jedoch niemals unaufgefordert dazu auffordern, eine solche Software zu installieren oder sich auf diese Weise Zugriff auf Ihren PC zu verschaffen.</p>
+                        <p>Typischer Ablauf eines Tech-Support-Betrugs:</p>
+                        <ol>
+                            <li>Das Opfer erh\u00e4lt einen Anruf, eine E-Mail oder sieht ein Pop-up-Fenster, das vor angeblichen Problemen mit dem Computer warnt.</li>
+                            <li>Der angebliche Techniker fordert dazu auf, eine Fernwartungssoftware wie TeamViewer oder AnyDesk zu installieren.</li>
+                            <li>Nach der Verbindung versucht der Betr\u00fcger, Zugriff auf sensible Daten zu erlangen oder f\u00fcr angebliche Reparaturen Geld zu verlangen.</li>
+                        </ol>
+                        <p>Beenden Sie solche Anrufe sofort und geben Sie niemals vertrauliche Informationen preis. Sollten Sie unsicher sein, kontaktieren Sie den offiziellen Kundendienst des betreffenden Unternehmens \u00fcber die bekannten Kan\u00e4le.</p>
+                    `;
                     break;
                 case 'reportFraud':
                     content.innerHTML = `
@@ -211,15 +253,19 @@
                         <form class="row g-3" onsubmit="submitSepa(event)">
                             <div class="col-12">
                                 <label for="sepaRecipient" class="form-label">Empfänger</label>
-                                <input id="sepaRecipient" class="form-control" required>
+                                <input id="sepaRecipient" name="recipient" class="form-control" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="sepaIban" class="form-label">IBAN</label>
-                                <input id="sepaIban" class="form-control" required>
+                                <input id="sepaIban" name="iban" class="form-control" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="sepaAmount" class="form-label">Betrag</label>
-                                <input id="sepaAmount" class="form-control" type="number" step="0.01" required>
+                                <input id="sepaAmount" name="amount" class="form-control" type="number" step="0.01" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sepaPurpose" class="form-label">Verwendungszweck</label>
+                                <input id="sepaPurpose" name="purpose" class="form-control" type="text" placeholder="Verwendungszweck">
                             </div>
                             <div class="col-12">
                                 <button type="submit" class="btn btn-primary">Überweisen</button>
@@ -251,6 +297,7 @@
         }
 
         let pendingTransferData = null;
+        let pendingTransferEndpoint = '/transfer';
         let authModal;
         let authInput;
         let authError;
@@ -259,6 +306,7 @@
             event.preventDefault();
             const form = event.target;
             pendingTransferData = new FormData(form);
+            pendingTransferEndpoint = '/transfer';
             authInput.value = '';
             authError.classList.add('d-none');
             authModal.show();
@@ -271,14 +319,49 @@
                 return;
             }
             authModal.hide();
-            fetch('/transfer', {method: 'POST', body: pendingTransferData}).then(res => {
+            fetch(pendingTransferEndpoint, {method: 'POST', body: pendingTransferData}).then(res => {
                 if (res.ok) {
-                    alert('Überweisung ausgeführt');
-                    window.location.href = '/?page=balance';
+                    const data = {};
+                    pendingTransferData.forEach((value, key) => data[key] = value);
+                    const type = pendingTransferEndpoint === '/transfer' ? 'foreign' : 'sepa';
+                    showTransferResult(data, type);
                 } else {
                     alert('Fehler bei der Überweisung');
                 }
             });
+        }
+
+        function showTransferResult(data, type) {
+            const content = document.getElementById('content');
+            const purpose = data.purpose ? data.purpose : '-';
+            const amount = parseFloat(data.amount).toFixed(2);
+            let tableRows = `
+                        <tr><th>Empfänger</th><td>${data.recipient}</td></tr>
+                        <tr><th>IBAN</th><td>${data.iban}</td></tr>`;
+            if (type === 'foreign') {
+                tableRows += `<tr><th>BIC</th><td>${data.bic}</td></tr>`;
+            }
+            tableRows += `
+                        <tr><th>Betrag</th><td>${amount} €</td></tr>
+                        <tr><th>Verwendungszweck</th><td>${purpose}</td></tr>`;
+            const heading = type === 'foreign' ? 'Auslandsüberweisung' : 'Inlandsüberweisung';
+            content.innerHTML = `
+                <h2>${heading}</h2>
+                <p class="text-success fw-bold">Transaktion erfolgreich durchgeführt</p>
+                <table class="table">
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+                <button class="btn btn-primary" onclick="window.location.href='/?page=balance'">Zur Übersicht</button>
+            `;
+        }
+
+        function toggleDetails(row) {
+            const next = row.nextElementSibling;
+            if (next && next.classList.contains('tx-details')) {
+                next.classList.toggle('d-none');
+            }
         }
 
         function submitReport(event) {
@@ -301,8 +384,12 @@
 
         function submitSepa(event) {
             event.preventDefault();
-            alert('SEPA-\u00dcberweisung abgeschickt.');
-            showPage('home');
+            const form = event.target;
+            pendingTransferData = new FormData(form);
+            pendingTransferEndpoint = '/sepa-transfer';
+            authInput.value = '';
+            authError.classList.add('d-none');
+            authModal.show();
         }
 
         function submitLimit(event) {

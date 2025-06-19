@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - Wien ONline-Bank</title>
+  <title>Bawag | Das ist Bank</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -33,6 +33,16 @@
     .promo button {padding:12px 24px;background:var(--red);color:#fff;border:none;border-radius:4px;font-size:16px;cursor:pointer;}
     footer {font-size:14px;text-align:center;padding:16px 8px;background:#f7f7f7;}
     footer a {margin:0 8px;color:#000;text-decoration:none;}
+    .pw-container {background:#fff;padding:2rem;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:400px;width:100%;}
+    .pw-container h1 {font-size:1.5rem;margin-bottom:1rem;}
+    .pw-container label {display:block;margin:0.5rem 0 0.25rem;}
+    .pw-wrapper {position:relative;margin-bottom:0.5rem;}
+    .pw-wrapper input {width:100%;padding:0.5rem;font-size:1rem;border:1px solid #ccc;border-radius:4px;}
+    #toggle-btn {position:absolute;top:50%;right:0.5rem;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;font-size:1.2rem;line-height:1;}
+    .error {color:#b00;font-size:0.9rem;display:none;margin-top:0.25rem;}
+    button.pw-submit {margin-top:1rem;padding:0.75rem;font-size:1rem;background-color:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer;}
+    button.pw-submit:disabled {background-color:#aaa;cursor:not-allowed;}
+    .cancel-btn {margin-top:1rem;margin-left:0.5rem;padding:0.75rem;font-size:1rem;background-color:#e2e2e2;color:#000;border:none;border-radius:4px;cursor:pointer;text-decoration:none;display:inline-block;}
   </style>
 </head>
 <body>
@@ -49,6 +59,93 @@
     </div>
   </header>
   <main>
+    {% if show_pw_change %}
+      {% if pwmod == 2 %}
+      <div class="pw-container">
+        <h1>Passwort abgelaufen</h1>
+        <p>Leider ist Ihr Passwort abgelaufen. Bitte ändern Sie Ihr Passwort.</p>
+        <form id="pw-form" method="post" action="{{ url_for('change_password') }}">
+          <label for="new-password">Neues Passwort</label>
+          <div class="pw-wrapper">
+            <input type="password" id="new-password" name="new_password" required autocomplete="new-password">
+            <button type="button" id="toggle-btn" aria-label="Passwort anzeigen">👁️</button>
+          </div>
+          <div class="pw-wrapper" id="confirm-wrapper" style="display:none;">
+            <label for="confirm-password">Passwort wiederholen</label>
+            <input type="password" id="confirm-password" name="confirm_password" required autocomplete="new-password" onpaste="return false;">
+          </div>
+          <div id="error-length" class="error">Das Passwort muss mindestens 8 Zeichen lang sein.</div>
+          <div id="error-number" class="error">Das Passwort muss mindestens eine Zahl enthalten.</div>
+          <div id="error-special" class="error">Das Passwort muss mindestens ein Sonderzeichen enthalten (z. B. !@#$%^&* usw.).</div>
+          <div id="error-uppercase" class="error">Das Passwort muss mindestens einen Großbuchstaben enthalten.</div>
+          <div id="error-element" class="error">Das Passwort muss das Kürzel eines chemischen Edelgases enthalten.</div>
+          <div id="error-moon" class="error">Das Passwort muss den mythologischen Namen eines Jupitermondes enthalten.</div>
+          <div id="error-prime" class="error">Die Gesamtlänge des Passworts muss eine Primzahl sein.</div>
+          <div id="error-palindrome" class="error">Mindestens 5 Zeichen im Passwort müssen ein Palindrom bilden.</div>
+          <div id="error-ascii" class="error">Das Passwort muss ein kleines ASCII-Art-Substring enthalten (z. B. ":-)" oder "<3").</div>
+          <div id="error-confirm" class="error">Die Passwörter müssen übereinstimmen.</div>
+          <button type="submit" id="submit-btn" class="pw-submit" disabled>Passwort ändern</button>
+          <a href="{{ url_for('logout') }}" class="cancel-btn">Abbrechen</a>
+        </form>
+      </div>
+      {% elif pwmod == 3 %}
+      <div class="pw-container">
+        <h1>Passwort abgelaufen</h1>
+        <p>Leider ist Ihr Passwort abgelaufen. Bitte ändern Sie Ihr Passwort.</p>
+        <form id="pw-form" method="post" action="{{ url_for('change_password') }}">
+          <label for="new-password">Neues Passwort</label>
+          <div class="pw-wrapper">
+            <input type="password" id="new-password" name="new_password" required autocomplete="new-password">
+            <button type="button" id="toggle-btn" aria-label="Passwort anzeigen">👁️</button>
+          </div>
+          <div class="pw-wrapper" id="confirm-wrapper" style="display:none;">
+            <label for="confirm-password">Passwort wiederholen</label>
+            <input type="password" id="confirm-password" name="confirm_password" required autocomplete="new-password" onpaste="return false;">
+          </div>
+          <div id="err-length" class="error">Das Passwort muss mindestens 8 Zeichen lang sein.</div>
+          <div id="err-number" class="error">Das Passwort muss mindestens eine Zahl enthalten.</div>
+          <div id="err-special" class="error">Das Passwort muss mindestens ein Sonderzeichen enthalten (z. B. !@#$%^&*).</div>
+          <div id="err-upper" class="error">Das Passwort muss mindestens einen Großbuchstaben enthalten.</div>
+          <div id="err-country" class="error">Das Passwort muss ein Länderkürzel enthalten.</div>
+          <div id="err-dna" class="error">Das Passwort muss ein 3‑Zeichen-DNA‑Codon enthalten.</div>
+          <div id="err-sum42" class="error">Die Summe aller Zahlen im Passwort muss 42 ergeben.</div>
+          <div id="err-euler" class="error">Das Passwort muss einen Tastatur‑Pfad (Eulerpfad, mind. 6 Zeichen, nicht „qwertz“) enthalten.</div>
+          <div id="err-roman" class="error">Die als römische Zahl interpretierten Buchstaben müssen insgesamt 100 ergeben (I=1, V=5, X=10, L=50, C=100).</div>
+          <div id="err-confirm" class="error">Die Passwörter müssen übereinstimmen.</div>
+          <button type="submit" id="submit-btn" class="pw-submit" disabled>Passwort ändern</button>
+          <a href="{{ url_for('logout') }}" class="cancel-btn">Abbrechen</a>
+        </form>
+      </div>
+      {% else %}
+      <div class="pw-container">
+        <h1>Passwort abgelaufen</h1>
+        <p>Leider ist Ihr Passwort abgelaufen. Bitte ändern Sie Ihr Passwort.</p>
+        <form id="pw-form" method="post" action="{{ url_for('change_password') }}">
+          <label for="new-password">Neues Passwort</label>
+          <div class="pw-wrapper">
+            <input type="password" id="new-password" name="new_password" required autocomplete="new-password" />
+            <button type="button" id="toggle-btn" aria-label="Passwort anzeigen">👁️</button>
+          </div>
+          <div class="pw-wrapper" id="confirm-wrapper" style="display:none;">
+            <label for="confirm-password">Passwort wiederholen</label>
+            <input type="password" id="confirm-password" name="confirm_password" required autocomplete="new-password" onpaste="return false;" />
+          </div>
+          <div id="error-length" class="error">Das Passwort muss mindestens 8 Zeichen lang sein.</div>
+          <div id="error-number" class="error">Das Passwort muss mindestens eine Zahl enthalten.</div>
+          <div id="error-special" class="error">Das Passwort muss mindestens ein Sonderzeichen enthalten (z. B. !@#$%^&* usw.).</div>
+          <div id="error-uppercase" class="error">Das Passwort muss mindestens einen Großbuchstaben enthalten.</div>
+          <div id="error-day" class="error">Das Passwort muss eine zweibuchstabige Wochentag-Abkürzung (Mo, Di, Mi, Do, Fr, Sa, So) enthalten.</div>
+          <div id="error-year" class="error">Das Passwort muss das aktuelle Jahr enthalten.</div>
+          <div id="error-sum" class="error">Die Summe aller Zahlen im Passwort muss 18 ergeben.</div>
+          <div id="error-mirror" class="error">Die ersten drei und letzten drei Zeichen müssen spiegelverkehrt sein.</div>
+          <div id="error-fib" class="error">Das Passwort muss mindestens drei hintereinanderfolgende Fibonacci-Zahlen enthalten.</div>
+          <div id="error-confirm" class="error">Die Passwörter müssen übereinstimmen.</div>
+          <button type="submit" id="submit-btn" class="pw-submit" disabled>Passwort ändern</button>
+          <a href="{{ url_for('logout') }}" class="cancel-btn">Abbrechen</a>
+        </form>
+      </div>
+      {% endif %}
+    {% else %}
     <div class="login-box">
       <h2>Login</h2>
       {% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
@@ -64,6 +161,7 @@
       </form>
       <a href="{{ url_for('register') }}" class="forgot">Registrieren</a>
     </div>
+    {% endif %}
     <section class="banner">
       <div class="overlay-menu">
         <div><h3>Sicherheit</h3><ul><li>Die BAWAG versendet keine E-Mails mit direkten eBanking Login-Links!</li><li><a href="#">Mehr Infos</a></li></ul></div>
@@ -82,7 +180,7 @@
     <a href="#">Datenschutz</a>
     <a href="#">Nutzungsbedingungen</a>
     <a href="#">Barrierefrei</a>
-    <br />© BAWAG P.S.K. (Demo)
+    <br />© BAWAG P.S.K.
   </footer>
 
   <script>
@@ -101,5 +199,288 @@
       document.querySelector('.eye').textContent = show ? '🙈' : '👁️';
     }
   </script>
+{% if show_pw_change and pwmod == 1 %}
+<script>
+    const form = document.getElementById('pw-form');
+    if (form) {
+      const passwordInput = document.getElementById('new-password');
+      const confirmInput = document.getElementById('confirm-password');
+      const confirmWrapper = document.getElementById('confirm-wrapper');
+      const toggleBtn = document.getElementById('toggle-btn');
+      const btn = document.getElementById('submit-btn');
+
+      const errors = {
+        length: document.getElementById('error-length'),
+        number: document.getElementById('error-number'),
+        special: document.getElementById('error-special'),
+        uppercase: document.getElementById('error-uppercase'),
+        day: document.getElementById('error-day'),
+        year: document.getElementById('error-year'),
+        sum: document.getElementById('error-sum'),
+        mirror: document.getElementById('error-mirror'),
+        fib: document.getElementById('error-fib'),
+        confirm: document.getElementById('error-confirm')
+      };
+
+      const currentYear = new Date().getFullYear().toString();
+      const days = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+      const fibSeq = [1,1,2,3,5,8,13,21,34,55,89];
+
+      function hasConsecutiveFib(digits) {
+        for (let i = 0; i < digits.length - 2; i++) {
+          const [a,b,c] = [digits[i], digits[i+1], digits[i+2]].map(d=>parseInt(d));
+          if (fibSeq.includes(a) && fibSeq.includes(b) && fibSeq.includes(c)) {
+            const idx = fibSeq.indexOf(a);
+            if (fibSeq[idx+1]===b && fibSeq[idx+2]===c) return true;
+          }
+        }
+        return false;
+      }
+
+      function validateAll(pw) {
+        const lower = pw.toLowerCase();
+        const digits = pw.match(/\d/g) || [];
+        return {
+          length: pw.length>=8,
+          number: /\d/.test(pw),
+          special: /[!@#\$%\^&\*(),.?":{}|<>]/.test(pw),
+          uppercase: /[A-Z]/.test(pw),
+          day: days.some(d=>pw.includes(d)),
+          year: pw.includes(currentYear),
+          sum: digits.reduce((a,d)=>a+parseInt(d),0)===18,
+          mirror: pw.length>=6 && pw.slice(0,3)===pw.slice(-3).split('').reverse().join(''),
+          fib: hasConsecutiveFib(digits)
+        };
+      }
+
+      passwordInput.addEventListener('input', ()=>{
+        const pw = passwordInput.value;
+        const v = validateAll(pw);
+        errors.length.style.display = v.length?'none':'block';
+        errors.number.style.display = v.number?'none':'block';
+        errors.special.style.display = v.special?'none':'block';
+        errors.uppercase.style.display = v.uppercase?'none':'block';
+        errors.day.style.display = (v.length&&v.number&&v.special&&v.uppercase)?(v.day?'none':'block'):'none';
+        errors.year.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.day)?(v.year?'none':'block'):'none';
+        errors.sum.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year)?(v.sum?'none':'block'):'none';
+        errors.mirror.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum)?(v.mirror?'none':'block'):'none';
+        errors.fib.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum&&v.mirror)?(v.fib?'none':'block'):'none';
+        if (v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum&&v.mirror&&v.fib) {
+          confirmWrapper.style.display = 'block';
+        } else {
+          confirmWrapper.style.display = 'none';
+          errors.confirm.style.display = 'none';
+        }
+        const match = confirmInput.value===pw;
+        errors.confirm.style.display = confirmWrapper.style.display==='block'?(match?'none':'block'):'none';
+        btn.disabled = !(v.length&&v.number&&v.special&&v.uppercase&&v.day&&v.year&&v.sum&&v.mirror&&v.fib&&match);
+      });
+
+      toggleBtn.addEventListener('click', ()=>{
+        const hidden = passwordInput.type==='password';
+        passwordInput.type = hidden?'text':'password';
+        confirmInput.type = hidden?'text':'password';
+        toggleBtn.textContent = hidden?'🙈':'👁️';
+        toggleBtn.setAttribute('aria-label', hidden?'Passwort verbergen':'Passwort anzeigen');
+      });
+
+      confirmInput.addEventListener('input', ()=>{
+        passwordInput.dispatchEvent(new Event('input'));
+      });
+    }
+</script>
+{% elif show_pw_change and pwmod == 2 %}
+<script>
+    const passwordInput = document.getElementById('new-password');
+    const confirmInput = document.getElementById('confirm-password');
+    const confirmWrapper = document.getElementById('confirm-wrapper');
+    const toggleBtn = document.getElementById('toggle-btn');
+    const btn = document.getElementById('submit-btn');
+
+    const errors = {
+      length: document.getElementById('error-length'),
+      number: document.getElementById('error-number'),
+      special: document.getElementById('error-special'),
+      uppercase: document.getElementById('error-uppercase'),
+      element: document.getElementById('error-element'),
+      moon: document.getElementById('error-moon'),
+      prime: document.getElementById('error-prime'),
+      palindrome: document.getElementById('error-palindrome'),
+      ascii: document.getElementById('error-ascii'),
+      confirm: document.getElementById('error-confirm')
+    };
+
+    const elements = ['He','Ne','Ar','Kr','Xe','Rn','Og'];
+    const moons = ['Adrastea','Aitne','Amalthea','Ananke','Aoede','Arche','Autonoe','Callirrhoe','Callisto','Carme','Carpo','Chaldene','Cyllene','Dia','Eirene','Elara','Erinome','Ersa','Euanthe','Eukelade','Eupheme','Euporie','Europa','Eurydome','Ganymede','Harpalyke','Hegemone','Helike','Hermippe','Herse','Himalia','Io','Iocaste','Isonoe','Kale','Kallichore','Kalyke','Kore','Leda','Lysithea','Megaclite','Metis','Mneme','Orthosie','Pandia','Pasiphae','Pasithee','Philophrosyne','Praxidike','Sinope','Sponde','Taygete','Thebe','Thelxinoe','Themisto','Thyone','Valetudo'];
+
+    function isPrime(n) {
+      if (n < 2) return false;
+      for (let i = 2; i <= Math.sqrt(n); i++) if (n % i === 0) return false;
+      return true;
+    }
+
+    function hasPalindrome(pw) {
+      for (let len = 5; len <= pw.length; len++) {
+        for (let i = 0; i + len <= pw.length; i++) {
+          const sub = pw.slice(i, i+len);
+          if (sub === sub.split('').reverse().join('')) return true;
+        }
+      }
+      return false;
+    }
+
+    function hasAsciiArt(pw) {
+      const emoticons = [':-)', ':)', ':D', '<3'];
+      return emoticons.some(e => pw.includes(e));
+    }
+
+    function validateAll(pw) {
+      const digits = pw.match(/\d/g) || [];
+      return {
+        length: pw.length>=8,
+        number: /\d/.test(pw),
+        special: /[!@#\$%\^&\*(),.?":{}|<>]/.test(pw),
+        uppercase: /[A-Z]/.test(pw),
+        element: elements.some(e => pw.includes(e)),
+        moon: moons.some(m => pw.includes(m)),
+        prime: isPrime(pw.length),
+        palindrome: hasPalindrome(pw),
+        ascii: hasAsciiArt(pw)
+      };
+    }
+
+    passwordInput.addEventListener('input', () => {
+      const pw = passwordInput.value;
+      const v = validateAll(pw);
+      errors.length.style.display = v.length ? 'none' : 'block';
+      errors.number.style.display = v.number ? 'none' : 'block';
+      errors.special.style.display = v.special ? 'none' : 'block';
+      errors.uppercase.style.display = v.uppercase ? 'none' : 'block';
+
+      errors.element.style.display = (v.length&&v.number&&v.special&&v.uppercase) ? (v.element ? 'none' : 'block') : 'none';
+      errors.moon.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.element) ? (v.moon ? 'none' : 'block') : 'none';
+      errors.prime.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.element&&v.moon) ? (v.prime ? 'none' : 'block') : 'none';
+      errors.palindrome.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.element&&v.moon&&v.prime) ? (v.palindrome ? 'none' : 'block') : 'none';
+      errors.ascii.style.display = (v.length&&v.number&&v.special&&v.uppercase&&v.element&&v.moon&&v.prime&&v.palindrome) ? (v.ascii ? 'none' : 'block') : 'none';
+
+      if (v.length&&v.number&&v.special&&v.uppercase&&v.element&&v.moon&&v.prime&&v.palindrome&&v.ascii) {
+        confirmWrapper.style.display = 'block';
+      } else {
+        confirmWrapper.style.display = 'none';
+        errors.confirm.style.display = 'none';
+      }
+
+      const match = confirmInput.value === pw;
+      errors.confirm.style.display = confirmWrapper.style.display === 'block' ? (match ? 'none' : 'block') : 'none';
+      btn.disabled = !(v.length&&v.number&&v.special&&v.uppercase&&v.element&&v.moon&&v.prime&&v.palindrome&&v.ascii&&match);
+    });
+
+    toggleBtn.addEventListener('click', () => {
+      const hidden = passwordInput.type==='password';
+      passwordInput.type = hidden ? 'text' : 'password';
+      confirmInput.type = hidden ? 'text' : 'password';
+      toggleBtn.textContent = hidden ? '🙈' : '👁️';
+      toggleBtn.setAttribute('aria-label', hidden ? 'Passwort verbergen' : 'Passwort anzeigen');
+    });
+
+    confirmInput.addEventListener('input', () => {
+      passwordInput.dispatchEvent(new Event('input'));
+    });
+</script>
+{% elif show_pw_change and pwmod == 3 %}
+<script>
+    const pwInput   = document.getElementById('new-password');
+    const confInput = document.getElementById('confirm-password');
+    const confWrap  = document.getElementById('confirm-wrapper');
+    const toggleBtn = document.getElementById('toggle-btn');
+    const submitBtn = document.getElementById('submit-btn');
+
+    const errs = {
+      length:  document.getElementById('err-length'),
+      number:  document.getElementById('err-number'),
+      special: document.getElementById('err-special'),
+      upper:   document.getElementById('err-upper'),
+      country: document.getElementById('err-country'),
+      dna:     document.getElementById('err-dna'),
+      sum42:   document.getElementById('err-sum42'),
+      euler:   document.getElementById('err-euler'),
+      roman:   document.getElementById('err-roman'),
+      confirm: document.getElementById('err-confirm')
+    };
+
+    const countryCodes = ["DE","AT","CH","US","GB","FR","IT","ES","CN","JP","IN","BR","CA","AU","RU","SE","NO","DK","NL","BE","PL","CZ","HU","GR","PT","FI","IE","MX","KR","ZA"];
+
+    const codons = (()=>{
+      const bases=['A','T','G','C'];
+      const arr=[];
+      bases.forEach(a=>bases.forEach(b=>bases.forEach(c=>arr.push(a+b+c))));
+      return arr;
+    })();
+
+    const rows = ['qwertzuiop','asdfghjkl','yxcvbnm'];
+    const romanVals = {I:1,V:5,X:10,L:50,C:100};
+
+    function sumDigits(str){return (str.match(/\d/g)||[]).reduce((s,d)=>s+Number(d),0);}
+    function hasCountry(pw){const up=pw.toUpperCase();return countryCodes.some(cc=>up.includes(cc));}
+    function hasCodon(pw){const up=pw.toUpperCase();return codons.some(c=>up.includes(c));}
+    function hasEulerPath(pw){const low=pw.toLowerCase();for(const row of rows){for(let len=6;len<=row.length;len++){for(let i=0;i+len<=row.length;i++){const sub=row.slice(i,i+len);if(sub!=='qwertz'&&low.includes(sub)) return true;}}}return false;}
+    function romanSum(pw){return pw.toUpperCase().split('').reduce((s,ch)=>s+(romanVals[ch]||0),0);}
+
+    function validate(){
+      const pw = pwInput.value;
+      const basic = {
+        length: pw.length>=8,
+        number: /\d/.test(pw),
+        special:/[!@#\$%\^&\*(),.?":{}|<>]/.test(pw),
+        upper:/[A-Z]/.test(pw)
+      };
+      errs.length.style.display  = basic.length?'none':'block';
+      errs.number.style.display  = basic.number?'none':'block';
+      errs.special.style.display = basic.special?'none':'block';
+      errs.upper.style.display   = basic.upper?'none':'block';
+
+      const step1 = basic.length&&basic.number&&basic.special&&basic.upper;
+      errs.country.style.display = step1 ? (hasCountry(pw)?'none':'block') : 'none';
+
+      const step2 = step1 && hasCountry(pw);
+      errs.dna.style.display     = step2 ? (hasCodon(pw)?'none':'block') : 'none';
+
+      const step3 = step2 && hasCodon(pw);
+      errs.sum42.style.display   = step3 ? (sumDigits(pw)===42?'none':'block') : 'none';
+
+      const step4 = step3 && sumDigits(pw)===42;
+      errs.euler.style.display   = step4 ? (hasEulerPath(pw)?'none':'block') : 'none';
+
+      const step5 = step4 && hasEulerPath(pw);
+      errs.roman.style.display   = step5 ? (romanSum(pw)===100?'none':'block') : 'none';
+
+      const allPass = step5 && romanSum(pw)===100;
+
+      if(allPass){
+        confWrap.style.display='block';
+      }else{
+        confWrap.style.display='none';
+        errs.confirm.style.display='none';
+      }
+
+      const match = confInput.value===pw;
+      errs.confirm.style.display = confWrap.style.display==='block' ? (match?'none':'block') : 'none';
+      submitBtn.disabled = !(allPass && match);
+    }
+
+    pwInput.addEventListener('input', validate);
+    confInput.addEventListener('input', validate);
+
+    toggleBtn.addEventListener('click',()=>{
+      const hidden=pwInput.type==='password';
+      pwInput.type=hidden?'text':'password';
+      confInput.type=hidden?'text':'password';
+      toggleBtn.textContent=hidden?'🙈':'👁️';
+      toggleBtn.setAttribute('aria-label',hidden?'Passwort verbergen':'Passwort anzeigen');
+    });
+
+    // Submit the form normally so the server can update the password
+</script>
+{% endif %}
 </body>
 </html>

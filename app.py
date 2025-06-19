@@ -1,7 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session
+import json
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta, date
+import random
 
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = 'change_this_secret'
@@ -11,10 +14,31 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
 
 db = SQLAlchemy(app)
 
+
+def random_account_number():
+    """Return a random 10-digit account number."""
+    return "".join(str(random.randint(0, 9)) for _ in range(10))
+
+
+def random_iban():
+    """Return a random Austrian IBAN starting with AT."""
+    return "AT" + "".join(str(random.randint(0, 9)) for _ in range(18))
+
+
+def load_config():
+    """Load configuration from config.json if it exists."""
+    try:
+        with open("config.json", "r") as f:
+            return json.load(f)
+    except Exception:
+        return {"pwmod": 0}
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
+    account_number = db.Column(db.String(20))
+    account_iban = db.Column(db.String(34))
 
 
 class Transaction(db.Model):
@@ -23,24 +47,53 @@ class Transaction(db.Model):
     date = db.Column(db.Date, nullable=False)
     description = db.Column(db.String(200), nullable=False)
     amount = db.Column(db.Float, nullable=False)
+    iban = db.Column(db.String(34))
+    bic = db.Column(db.String(11))
+    purpose = db.Column(db.String(200))
     user = db.relationship('User', backref=db.backref('transactions', lazy=True))
 
 with app.app_context():
     db.create_all()
+    inspector = db.inspect(db.engine)
+    cols = {c["name"] for c in inspector.get_columns("user")}
+    added = False
+    if "account_number" not in cols:
+        db.session.execute(
+            text("ALTER TABLE user ADD COLUMN account_number VARCHAR(20)")
+        )
+        added = True
+    if "account_iban" not in cols:
+        db.session.execute(
+            text("ALTER TABLE user ADD COLUMN account_iban VARCHAR(34)")
+        )
+        added = True
+    if added:
+        db.session.commit()
 
 @app.route('/')
 def dashboard():
     if 'user_id' in session:
         user = User.query.get(session['user_id'])
-        transactions = Transaction.query.filter_by(user_id=user.id).order_by(Transaction.date.desc()).all()
+        if not user:
+            session.pop('user_id', None)
+            return redirect(url_for('login'))
+        transactions = (
+            Transaction.query.filter_by(user_id=user.id)
+            .order_by(Transaction.date.desc(), Transaction.id.desc())
+            .all()
+        )
         balance = sum(t.amount for t in transactions)
         recent_transactions = transactions[:5]
+        account_number = user.account_number or random_account_number()
+        account_iban = user.account_iban or random_iban()
         return render_template(
             'index.html',
             transactions=transactions,
             recent_transactions=recent_transactions,
             balance=balance,
             username=user.username,
+            account_number=account_number,
+            account_iban=account_iban,
         )
     return redirect(url_for('login'))
 
@@ -53,6 +106,9 @@ def login():
         if user and check_password_hash(user.password, password):
             session.permanent = True
             session['user_id'] = user.id
+            cfg = load_config()
+            if cfg.get('pwmod') in (1, 2, 3):
+                return redirect(url_for('change_password'))
             return redirect(url_for('dashboard'))
         error = "Ungültige Anmeldedaten"
         return render_template('login.html', error=error)
@@ -76,6 +132,23 @@ def register():
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('login'))
+
+
+@app.route('/change-password', methods=['GET', 'POST'])
+def change_password():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    cfg = load_config()
+    pwmod = cfg.get('pwmod', 0)
+    if pwmod == 0:
+        return redirect(url_for('dashboard'))
+    if request.method == 'POST':
+        new_pw = request.form['new_password']
+        user = User.query.get(session['user_id'])
+        user.password = generate_password_hash(new_pw)
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+    return render_template('login.html', show_pw_change=True, pwmod=pwmod)
 
 
 @app.route('/transfer', methods=['POST'])
@@ -104,6 +177,41 @@ def transfer():
         date=date.today(),
         description=description,
         amount=-abs(amount),
+        iban=iban,
+        bic=bic,
+        purpose=purpose,
+    )
+    db.session.add(txn)
+    db.session.commit()
+    return '', 204
+
+@app.route('/sepa-transfer', methods=['POST'])
+def sepa_transfer():
+    """Create a new domestic SEPA transaction for the logged in user."""
+    if 'user_id' not in session:
+        return '', 401
+
+    recipient = request.form['recipient']
+    iban = request.form['iban']
+    amount_raw = request.form['amount']
+    purpose = request.form.get('purpose', '')
+
+    try:
+        amount = float(amount_raw)
+    except ValueError:
+        return 'Invalid amount', 400
+
+    description = f"\u00dcberweisung an {recipient}"
+    if purpose:
+        description += f": {purpose}"
+
+    txn = Transaction(
+        user_id=session['user_id'],
+        date=date.today(),
+        description=description,
+        amount=-abs(amount),
+        iban=iban,
+        purpose=purpose,
     )
     db.session.add(txn)
     db.session.commit()

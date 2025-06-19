@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Advanced Labyrinth – Human‑Check (leicht)</title>
+  <style>
+    :root {
+      --cell: 24px; /* Seitenlänge einer Zelle */
+      --cols: 15;   /* Maze‑Breite/Höhe (quadratisch) */
+      --w: calc(var(--cell) * var(--cols));
+      --wall: 4px;  /* Wanddicke */
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1b1b1b;
+      user-select: none;
+      font-family: system-ui, sans-serif;
+    }
+    #maze-container {
+      position: relative;
+      width: var(--w);
+      height: var(--w);
+      background: #000;
+      box-shadow: 0 0 25px rgba(0,0,0,.8);
+    }
+    #maze { display: block; background: #111; }
+
+    #ball {
+      position: absolute;
+      width: calc(var(--cell) - 6px);
+      height: calc(var(--cell) - 6px);
+      border-radius: 50%;
+      background: #ffbf00;
+      box-shadow: 0 0 7px #fffb9d;
+      cursor: grab;
+      transition: top .03s, left .03s;
+      z-index: 2;
+    }
+    #win {
+      position: absolute;
+      width: calc(var(--cell) - 6px);
+      height: calc(var(--cell) - 6px);
+      background: #00d26a;
+      box-shadow: 0 0 7px #00ff7b;
+      z-index: 1;
+    }
+    #msg {
+      position: absolute;
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+      background: rgba(0,0,0,.85);
+      padding: 24px 32px;
+      border: 2px solid #00d26a;
+      font-size: 1.6rem;
+      color: #fff;
+      display: none;
+      z-index: 3;
+    }
+  </style>
+</head>
+<body>
+  <div id="maze-container">
+    <canvas id="maze"></canvas>
+    <div id="ball"></div>
+    <div id="win"></div>
+    <div id="msg">Geschafft!</div>
+  </div>
+
+<script>
+/***** Konfiguration *****/
+const CELL   = 24;                // Pixel pro Zelle
+const COLS   = 15;                // Feld‑Anzahl (Maze‑Größe)
+const WALL   = 4;                 // Wanddicke
+const SIZE   = CELL * COLS;       // Canvas‑Größe
+const BALLR  = CELL / 2 - 3;      // Ball‑Radius
+
+const canvas = document.getElementById('maze');
+const ctx    = canvas.getContext('2d');
+canvas.width = canvas.height = SIZE;
+
+const ball   = document.getElementById('ball');
+const winBox = document.getElementById('win');
+const msg    = document.getElementById('msg');
+
+/***** Maze‑Generierung per Recursive Backtracker *****/
+class CellClass {
+  constructor(x, y) {
+    this.x = x; this.y = y;
+    this.walls = [true, true, true, true]; // T, R, B, L
+    this.visit = false;
+  }
+}
+const grid = Array.from({ length: COLS }, (_, y) => Array.from({ length: COLS }, (_, x) => new CellClass(x, y)));
+const idx  = (x, y) => (x >= 0 && x < COLS && y >= 0 && y < COLS) ? grid[y][x] : undefined;
+let current = idx(0, 0);
+current.visit = true;
+const stack = [];
+while (current) {
+  const { x, y } = current;
+  const neigh = [
+    { d: 0, dx: 0, dy: -1 },
+    { d: 1, dx: 1,  dy: 0 },
+    { d: 2, dx: 0,  dy: 1 },
+    { d: 3, dx: -1, dy: 0 }
+  ].map(t => ({ dir: t.d, cell: idx(x + t.dx, y + t.dy) })).filter(n => n.cell && !n.cell.visit);
+  if (neigh.length) {
+    const n = neigh[Math.random() * neigh.length | 0];
+    current.walls[n.dir] = false;
+    n.cell.walls[(n.dir + 2) % 4] = false;
+    stack.push(current);
+    current = n.cell; current.visit = true;
+  } else {
+    current = stack.pop();
+  }
+}
+
+/***** Wand‑Rechtecke erzeugen *****/
+const rects = [];
+rects.push([0, 0, SIZE, WALL], [0, 0, WALL, SIZE], [0, SIZE - WALL, SIZE, WALL], [SIZE - WALL, 0, WALL, SIZE]);
+for (let y = 0; y < COLS; y++) {
+  for (let x = 0; x < COLS; x++) {
+    const c = grid[y][x];
+    const px = x * CELL, py = y * CELL;
+    if (c.walls[0]) rects.push([px,              py,              CELL, WALL]);
+    if (c.walls[1]) rects.push([px + CELL - WALL, py,              WALL, CELL]);
+    if (c.walls[2]) rects.push([px,              py + CELL - WALL, CELL, WALL]);
+    if (c.walls[3]) rects.push([px,              py,              WALL, CELL]);
+  }
+}
+
+/***** Wände zeichnen *****/
+ctx.fillStyle = '#eee';
+rects.forEach(r => ctx.fillRect(...r));
+
+/***** Ball & Ziel‑Setup *****/
+const offset = (CELL - BALLR * 2) / 2;
+let drag = false, offX = 0, offY = 0; // drag‑State weiter oben definieren, damit resetBall darauf zugreifen kann
+function resetBall() {
+  ball.style.width = ball.style.height = `${BALLR * 2}px`;
+  ball.style.left = `${offset}px`;
+  ball.style.top  = `${offset}px`;
+  msg.style.display = 'none';
+  drag = false; // drag abbrechen, falls Kollision
+}
+resetBall();
+winBox.style.width = winBox.style.height = `${BALLR * 2}px`;
+winBox.style.left  = `${SIZE - CELL + offset}px`;
+winBox.style.top   = `${SIZE - CELL + offset}px`;
+
+/***** Kollisions‑ und Ziel‑Checks *****/
+function hitsWall(x, y) {
+  const cx = x + BALLR, cy = y + BALLR;
+  return rects.some(([wx, wy, ww, wh]) => cx > wx && cx < wx + ww && cy > wy && cy < wy + wh);
+}
+function inGoal(x, y) {
+  return x + BALLR * 2 > SIZE - CELL && y + BALLR * 2 > SIZE - CELL;
+}
+
+/***** Drag‑Interaktion *****/
+ball.addEventListener('mousedown', e => { drag = true; offX = e.offsetX; offY = e.offsetY; msg.style.display='none'; });
+
+document.addEventListener('mousemove', e => {
+  if (!drag) return;
+  const r = canvas.getBoundingClientRect();
+  let x = e.clientX - r.left - offX;
+  let y = e.clientY - r.top  - offY;
+  x = Math.max(0, Math.min(x, SIZE - BALLR * 2));
+  y = Math.max(0, Math.min(y, SIZE - BALLR * 2));
+  if (hitsWall(x, y)) {
+    resetBall();
+    return; // sofort abbrechen, damit der Ball nicht weiterfolgt
+  }
+  ball.style.left = `${x}px`;
+  ball.style.top  = `${y}px`;
+  if (inGoal(x, y)) { msg.style.display = 'block'; drag = false; }
+});
+
+document.addEventListener('mouseup', () => drag = false);
+</script>
+</body>
+</html>
