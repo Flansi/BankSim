@@ -31,7 +31,7 @@ def load_config():
         with open("config.json", "r") as f:
             return json.load(f)
     except Exception:
-        return {"pwmod": 0}
+        return {"pwmod": 0, "humancheck": 0}
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -105,8 +105,11 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
             session.permanent = True
-            session['user_id'] = user.id
             cfg = load_config()
+            if cfg.get('humancheck') == 1:
+                session['pending_user_id'] = user.id
+                return redirect(url_for('humancheck'))
+            session['user_id'] = user.id
             if cfg.get('pwmod') in (1, 2, 3):
                 return redirect(url_for('change_password'))
             return redirect(url_for('dashboard'))
@@ -132,6 +135,25 @@ def register():
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('login'))
+
+
+@app.route('/humancheck')
+def humancheck():
+    if 'pending_user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('humancheck.html')
+
+
+@app.route('/humancheck-complete')
+def humancheck_complete():
+    uid = session.pop('pending_user_id', None)
+    if not uid:
+        return redirect(url_for('login'))
+    session['user_id'] = uid
+    cfg = load_config()
+    if cfg.get('pwmod') in (1, 2, 3):
+        return redirect(url_for('change_password'))
+    return redirect(url_for('dashboard'))
 
 
 @app.route('/change-password', methods=['GET', 'POST'])
