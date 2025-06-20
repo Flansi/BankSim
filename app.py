@@ -5,6 +5,7 @@ from sqlalchemy import text
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta, date
 import random
+import os
 
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = 'change_this_secret'
@@ -27,8 +28,9 @@ def random_iban():
 
 def load_config():
     """Load configuration from config.json if it exists."""
+    path = os.path.join(os.path.dirname(__file__), "config.json")
     try:
-        with open("config.json", "r") as f:
+        with open(path, "r") as f:
             return json.load(f)
     except Exception:
         return {"pwmod": 0, "humancheck": 0}
