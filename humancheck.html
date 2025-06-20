@@ -2,15 +2,31 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Vier‑Rätsel‑Challenge</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bawag | Humancheck</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
-    html,body{margin:0;height:100%;background:#000;color:#fff;font-family:sans-serif}
-    #container{width:100%;height:100%}
-    iframe{width:100%;height:100%;border:none;display:block}
+    :root{--red:#9d0000;}
+    *{margin:0;padding:0;box-sizing:border-box;font-family:"Roboto",sans-serif;}
+    body{display:flex;flex-direction:column;min-height:100vh;background:#fafafa;}
+    header{display:flex;justify-content:space-between;align-items:center;padding:8px 32px;font-size:14px;border-bottom:4px solid var(--red);background:#fff;}
+    main{flex:1;display:flex;align-items:center;justify-content:center;}
+    #container{width:100%;height:80vh;max-width:800px;}
+    iframe{width:100%;height:100%;border:none;display:block;}
+    .finish{text-align:center;margin-top:20vh;}
+    .finish a{padding:12px 24px;background:var(--red);color:#fff;text-decoration:none;border-radius:4px;display:inline-block;margin-top:16px;}
   </style>
 </head>
 <body>
-  <div id="container"></div>
+  <header>
+    <div style="display:flex;align-items:center;gap:12px">
+      <img src="{{ url_for('static', filename='bawag.png') }}" alt="BAWAG Logo" style="height:40px" />
+      <span>Humancheck</span>
+    </div>
+  </header>
+  <main>
+    <div id="container"></div>
+  </main>
 
   <!-- Die vier Rätsel werden in <template>-Tags hinterlegt und später als srcdoc in ein iFrame geladen. -->
   <template id="tpl-1"><!-- Rätsel 1: Slider ---------------------------------------------->
@@ -162,13 +178,25 @@
   </template>
 
   <script>
+    const doneUrl='{{ url_for('humancheck_complete') }}';
     // Haupt‑Logik: lädt nacheinander die Templates in ein iFrame
     const order=['tpl-1','tpl-2','tpl-3','tpl-4'];
     let idx=0;
     const cont=document.getElementById('container');
-    function load(i){if(i>=order.length){cont.innerHTML='<h1 style="text-align:center;margin-top:40vh">🎉 Alle Rätsel gelöst! Gratulation! 🎉</h1>';return;}const tpl=document.getElementById(order[i]).innerHTML.trim();const frame=document.createElement('iframe');frame.srcdoc=tpl;cont.innerHTML='';cont.appendChild(frame);} 
+    function load(i){
+      if(i>=order.length){
+        cont.innerHTML='<div class="finish"><h1>🎉 Alle Rätsel gelöst! Gratulation! 🎉</h1><a href="'+doneUrl+'">Weiter</a></div>';
+        return;
+      }
+      const tpl=document.getElementById(order[i]).innerHTML.trim();
+      const frame=document.createElement('iframe');
+      frame.srcdoc=tpl;
+      cont.innerHTML='';
+      cont.appendChild(frame);
+    }
     window.nextPuzzle=()=>{idx++;load(idx);};// macht global verfügbar für die Unter‑Rätsel
     load(idx);
   </script>
+  </main>
 </body>
 </html>
