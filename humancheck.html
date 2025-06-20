@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Vier‑Rätsel‑Challenge</title>
+  <style>
+    html,body{margin:0;height:100%;background:#000;color:#fff;font-family:sans-serif}
+    #container{width:100%;height:100%}
+    iframe{width:100%;height:100%;border:none;display:block}
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+
+  <!-- Die vier Rätsel werden in <template>-Tags hinterlegt und später als srcdoc in ein iFrame geladen. -->
+  <template id="tpl-1"><!-- Rätsel 1: Slider ---------------------------------------------->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Rätsel 1 – Slider</title>
+  <style>
+    html,body{margin:0;height:100%;display:flex;align-items:center;justify-content:center;background:#111;font-family:sans-serif;color:#eee;overflow:hidden}
+    .blob{position:absolute;border-radius:50%;background:rgba(255,255,255,.05);animation:pulse 4s ease-in-out infinite}
+    .blob:nth-child(1){width:200px;height:200px;top:10%;left:20%;animation-delay:0s}
+    .blob:nth-child(2){width:300px;height:300px;top:50%;left:60%;animation-delay:1s}
+    .blob:nth-child(3){width:250px;height:250px;top:70%;left:30%;animation-delay:2s}
+    @keyframes pulse{0%,100%{transform:scale(.8);opacity:.05}50%{transform:scale(1.2);opacity:.15}}
+    #challenge{position:relative;width:80%;max-width:600px;text-align:center;z-index:1}
+    h2{margin-bottom:20px;animation:blink 1s step-start infinite}
+    @keyframes blink{50%{opacity:0}}
+    .slider-container{position:relative;margin:40px 0}
+    input[type=range]{-webkit-appearance:none;width:100%;height:12px;border-radius:6px;background:#555;outline:none;margin:0}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#0af;cursor:pointer;transition:background .3s}
+    input[type=range]::-webkit-slider-thumb:hover{background:#4fc3f7}
+    .marker{position:absolute;top:-8px;width:4px;height:28px;background:#f44;pointer-events:none}
+    #feedback{height:1.4em;font-size:1.2em;margin-top:10px}
+  </style>
+</head>
+<body>
+  <div class="blob"></div>
+  <div class="blob"></div>
+  <div class="blob"></div>
+  <div id="challenge">
+    <h2>Klicke den Slider exakt auf den roten Marker!</h2>
+    <div class="slider-container">
+      <div class="marker" id="marker"></div>
+      <input type="range" id="slider" min="0" max="100" value="0">
+    </div>
+    <div id="feedback"></div>
+  </div>
+  <script>
+    const slider=document.getElementById('slider');
+    const marker=document.getElementById('marker');
+    const feedback=document.getElementById('feedback');
+    let targetValue,solved=false;
+    function setNewTarget(){targetValue=10+Math.random()*80;positionMarker();feedback.textContent='';slider.value=0}
+    function positionMarker(){const pct=(targetValue-slider.min)/(slider.max-slider.min);marker.style.left=`calc(${pct*100}% - 2px)`}
+    slider.addEventListener('mouseup',check);slider.addEventListener('touchend',check);
+    function check(){if(solved)return;const val=+slider.value;const tol=3+Math.random()*2;if(Math.abs(val-targetValue)<=tol){feedback.textContent='✅ Perfekt getroffen!';solved=true;setTimeout(()=>parent.nextPuzzle(),600);}else{feedback.textContent='❌ Leider verfehlt, neuer Versuch…';setTimeout(setNewTarget,800);}}
+    window.addEventListener('resize',positionMarker);
+    setNewTarget();
+  </script>
+</body>
+</html>
+  </template>
+
+  <template id="tpl-2"><!-- Rätsel 2: Spot the Difference ---------------------------------------------->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Rätsel 2 – Spot the Difference</title>
+  <style>
+    body{margin:0;padding:20px;background:#222;color:#eee;font-family:sans-serif;text-align:center}
+    h1{margin-bottom:10px}
+    #container{display:flex;justify-content:center;gap:20px}
+    canvas{border:2px solid #555;background:#fff;cursor:crosshair}
+    #hint{margin-top:10px;font-size:.9em;color:#ccc}
+  </style>
+</head>
+<body>
+  <h1>Spot the Difference</h1>
+  <div id="container"><canvas id="origCanvas" width="400" height="400"></canvas><canvas id="modCanvas" width="400" height="400"></canvas></div>
+  <div id="hint">Klicke auf die Unterschiede im rechten Bild</div>
+  <script>
+    function drawStar(ctx,cx,cy,spikes,outer,inner,rotation=0){let rot=Math.PI/2*3+rotation,x=cx,y=cy,step=Math.PI/spikes;ctx.beginPath();ctx.moveTo(cx,cy-outer);for(let i=0;i<spikes;i++){x=cx+Math.cos(rot)*outer;y=cy+Math.sin(rot)*outer;ctx.lineTo(x,y);rot+=step;x=cx+Math.cos(rot)*inner;y=cy+Math.sin(rot)*inner;ctx.lineTo(x,y);rot+=step;}ctx.closePath();ctx.fill();}
+    const puzzles=[{drawOriginal(ctx){ctx.fillStyle='#87CEEB';ctx.fillRect(0,0,400,400);ctx.fillStyle='#228B22';ctx.fillRect(0,300,400,100);ctx.fillStyle='#D3D3D3';ctx.fillRect(150,200,100,100);ctx.fillStyle='#8B4513';ctx.beginPath();ctx.moveTo(150,200);ctx.lineTo(200,150);ctx.lineTo(250,200);ctx.closePath();ctx.fill();ctx.beginPath();ctx.arc(50,50,30,0,2*Math.PI);ctx.fillStyle='#FFD700';ctx.fill();ctx.fillStyle='#FFFFFF';ctx.fillRect(170,220,25,25);ctx.fillStyle='#8B4513';ctx.fillRect(280,240,15,60);ctx.beginPath();ctx.arc(287.5,225,30,0,2*Math.PI);ctx.fillStyle='#228B22';ctx.fill();},drawModified(ctx){ctx.fillStyle='#87CEEB';ctx.fillRect(0,0,400,400);ctx.fillStyle='#228B22';ctx.fillRect(0,300,400,100);ctx.fillStyle='#D3D3D3';ctx.fillRect(150,200,100,100);ctx.fillStyle='#8B4513';ctx.beginPath();ctx.moveTo(150,200);ctx.lineTo(200,150);ctx.lineTo(250,200);ctx.closePath();ctx.fill();ctx.beginPath();ctx.arc(50,50,30,0,2*Math.PI);ctx.fillStyle='#FF8C00';ctx.fill();ctx.fillStyle='#FF0000';ctx.fillRect(170,220,25,25);ctx.fillStyle='#8B4513';ctx.fillRect(280,240,15,60);ctx.beginPath();ctx.arc(287.5,225,30,0,2*Math.PI);ctx.fillStyle='#006400';ctx.fill();},diffs:[{x:50,y:50,r:20},{x:182.5,y:232.5,r:20},{x:287.5,y:225,r:20}]},{drawOriginal(ctx){ctx.fillStyle='#C0C0C0';ctx.fillRect(0,300,400,100);ctx.fillStyle='#FF0000';ctx.fillRect(100,250,200,50);ctx.fillStyle='#ADD8E6';ctx.fillRect(150,230,100,30);ctx.fillStyle='#000';ctx.beginPath();ctx.arc(130,300,20,0,2*Math.PI);ctx.fill();ctx.beginPath();ctx.arc(270,300,20,0,2*Math.PI);ctx.fill();},drawModified(ctx){ctx.fillStyle='#C0C0C0';ctx.fillRect(0,300,400,100);ctx.fillStyle='#0000FF';ctx.fillRect(100,250,200,50);ctx.fillStyle='#FFFFFF';ctx.fillRect(150,230,100,30);ctx.fillStyle='#000';ctx.beginPath();ctx.arc(130,300,15,0,2*Math.PI);ctx.fill();ctx.beginPath();ctx.arc(270,300,20,0,2*Math.PI);ctx.fill();},diffs:[{x:200,y:275,r:25},{x:130,y:300,r:25},{x:200,y:245,r:25}]},{drawOriginal(ctx){ctx.fillStyle='#87CEEB';ctx.fillRect(0,0,400,400);ctx.fillStyle='#228B22';ctx.fillRect(0,300,400,100);ctx.fillStyle='#8B4513';ctx.fillRect(180,220,40,100);ctx.beginPath();ctx.arc(200,200,50,0,2*Math.PI);ctx.fillStyle='#228B22';ctx.fill();ctx.beginPath();ctx.arc(250,180,10,0,2*Math.PI);ctx.fillStyle='#FF0000';ctx.fill();},drawModified(ctx){ctx.fillStyle='#87CEEB';ctx.fillRect(0,0,400,400);ctx.fillStyle='#228B22';ctx.fillRect(0,300,400,100);ctx.fillStyle='#8B4513';ctx.fillRect(170,220,60,100);ctx.beginPath();ctx.arc(200,200,50,0,2*Math.PI);ctx.fillStyle='#006400';ctx.fill();},diffs:[{x:200,y:200,r:25},{x:200,y:270,r:25},{x:250,y:180,r:25}]},{drawOriginal(ctx){ctx.fillStyle='#FFF';ctx.fillRect(0,0,400,400);ctx.beginPath();ctx.arc(200,200,100,0,2*Math.PI);ctx.fillStyle='#FFDBAC';ctx.fill();ctx.fillStyle='#000';ctx.beginPath();ctx.arc(160,180,10,0,2*Math.PI);ctx.fill();ctx.beginPath();ctx.arc(240,180,10,0,2*Math.PI);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=5;ctx.beginPath();ctx.arc(200,220,50,0,Math.PI);ctx.stroke();},drawModified(ctx){ctx.fillStyle='#FFF';ctx.fillRect(0,0,400,400);ctx.beginPath();ctx.arc(200,200,100,0,2*Math.PI);ctx.fillStyle='#FFD1A9';ctx.fill();ctx.fillStyle='#8B4513';ctx.beginPath();ctx.arc(160,180,10,0,2*Math.PI);ctx.fill();ctx.fillStyle='#000';ctx.beginPath();ctx.arc(240,180,10,0,2*Math.PI);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=5;ctx.beginPath();ctx.arc(200,260,50,Math.PI,2*Math.PI);ctx.stroke();},diffs:[{x:200,y:200,r:25},{x:160,y:180,r:25},{x:200,y:240,r:30}]},{drawOriginal(ctx){ctx.fillStyle='#001';ctx.fillRect(0,0,400,400);const p=[[80,80],[320,80],[80,320],[320,320],[200,200]];ctx.fillStyle='#FFD700';p.forEach(q=>drawStar(ctx,q[0],q[1],5,20,10));},drawModified(ctx){ctx.fillStyle='#001';ctx.fillRect(0,0,400,400);const p=[[80,80],[320,80],[80,320],[320,320],[200,200]];p.forEach(q=>{if(q[0]===320&&q[1]===80)return;if(q[0]===80&&q[1]===80)ctx.fillStyle='#FF0000';else ctx.fillStyle='#FFD700';if(q[0]===200&&q[1]===200)drawStar(ctx,q[0],q[1],5,30,15);else drawStar(ctx,q[0],q[1],5,20,10);});},diffs:[{x:320,y:80,r:25},{x:80,y:80,r:25},{x:200,y:200,r:30}]},{drawOriginal(ctx){ctx.fillStyle='#555';ctx.fillRect(180,50,40,120);ctx.beginPath();ctx.arc(200,80,15,0,2*Math.PI);ctx.fillStyle='#FF0000';ctx.fill();ctx.beginPath();ctx.arc(200,120,15,0,2*Math.PI);ctx.fillStyle='#FFFF00';ctx.fill();ctx.beginPath();ctx.arc(200,160,15,0,2*Math.PI);ctx.fillStyle='#00FF00';ctx.fill();},drawModified(ctx){ctx.fillStyle='#555';ctx.fillRect(180,50,40,120);ctx.beginPath();ctx.arc(200,80,15,0,2*Math.PI);ctx.fillStyle='#00FF00';ctx.fill();ctx.beginPath();ctx.arc(200,160,15,0,2*Math.PI);ctx.fillStyle='#FF0000';ctx.fill();},diffs:[{x:200,y:80,r:20},{x:200,y:120,r:20},{x:200,y:160,r:20}]}];
+    window.onload=()=>{const orig=document.getElementById('origCanvas');const mod=document.getElementById('modCanvas');const oCtx=orig.getContext('2d');const mCtx=mod.getContext('2d');const puzzle=puzzles[Math.random()*puzzles.length|0];puzzle.drawOriginal(oCtx);puzzle.drawModified(mCtx);let found=Array(puzzle.diffs.length).fill(false);mod.addEventListener('click',e=>{const r=mod.getBoundingClientRect();const x=e.clientX-r.left,y=e.clientY-r.top;puzzle.diffs.forEach((d,i)=>{if(!found[i]&&Math.hypot(x-d.x,y-d.y)<d.r){found[i]=true;mCtx.strokeStyle='lime';mCtx.lineWidth=3;mCtx.beginPath();mCtx.arc(d.x,d.y,d.r,0,2*Math.PI);mCtx.stroke();if(found.every(v=>v)){setTimeout(()=>{parent.nextPuzzle();},400);}}});});};
+  </script>
+</body>
+</html>
+  </template>
+
+  <template id="tpl-3"><!-- Rätsel 3: Reihenfolge-Klickspiel ---------------------------------------------->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Rätsel 3 – Reihenfolge merken</title>
+  <style>
+    html,body{margin:0;height:100%;display:flex;align-items:center;justify-content:center;background:#222;user-select:none;overflow:hidden}
+    #message{position:absolute;top:20px;width:100%;text-align:center;font-family:sans-serif;color:#0f0;font-size:1.6em;pointer-events:none}
+    canvas{background:#333;border:4px solid #555;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div id="message">Merke dir die Reihenfolge: 10 s</div>
+  <canvas id="game" width="600" height="400"></canvas>
+  <script>
+    const canvas=document.getElementById('game');
+    const ctx=canvas.getContext('2d');
+    const msg=document.getElementById('message');
+    let circles=[],sequenceLen=9,step,showing,memTime,memInterval;
+    function init(){circles=[];step=1;showing=true;memTime=10;msg.textContent=`Merke dir die Reihenfolge: ${memTime} s`;const radius=30,pad=radius+10;for(let i=1;i<=sequenceLen;i++){let x,y,ok;do{ok=true;x=pad+Math.random()*(canvas.width-2*pad);y=pad+Math.random()*(canvas.height-2*pad);for(const c of circles){if(Math.hypot(c.x-x,c.y-y)<radius*2+10){ok=false;break;}}}while(!ok);circles.push({x,y,r:radius,val:i,done:false});}draw();clearInterval(memInterval);memInterval=setInterval(()=>{memTime--;if(memTime>0){msg.textContent=`Merke dir die Reihenfolge: ${memTime} s`;}else{clearInterval(memInterval);showing=false;msg.textContent='';draw();}},1000);} 
+    function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);circles.forEach(c=>{ctx.beginPath();ctx.arc(c.x,c.y,c.r,0,2*Math.PI);ctx.fillStyle=c.done?'#0a0':'#888';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle='#222';ctx.stroke();if(showing||c.done){ctx.fillStyle='#fff';ctx.font='20px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(c.val,c.x,c.y);}});} 
+    canvas.addEventListener('click',e=>{if(showing)return;const r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;for(const c of circles){if(!c.done&&Math.hypot(mx-c.x,my-c.y)<c.r){if(c.val===step){c.done=true;step++;msg.textContent=step>sequenceLen?'✅ Level geschafft!':'Richtig! Weiter zu '+step;draw();if(step>sequenceLen){setTimeout(()=>{parent.nextPuzzle();},700);}else setTimeout(()=>msg.textContent='',500);}else{msg.textContent='❌ Falsch, neuer Versuch…';setTimeout(init,800);}break;}}});
+    init();
+  </script>
+</body>
+</html>
+  </template>
+
+  <template id="tpl-4"><!-- Rätsel 4: Labyrinth ---------------------------------------------->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Rätsel 4 – Labyrinth</title>
+  <style>
+    :root{--cell:24px;--cols:15;--w:calc(var(--cell)*var(--cols));--wall:4px}
+    *{box-sizing:border-box}
+    body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:#1b1b1b;font-family:sans-serif;user-select:none}
+    #maze-container{position:relative;width:var(--w);height:var(--w);background:#000;box-shadow:0 0 25px rgba(0,0,0,.8)}
+    #maze{display:block;background:#111}
+    #ball{position:absolute;width:calc(var(--cell) - 6px);height:calc(var(--cell) - 6px);border-radius:50%;background:#ffbf00;box-shadow:0 0 7px #fffb9d;cursor:grab;transition:top .03s,left .03s;z-index:2}
+    #win{position:absolute;width:calc(var(--cell) - 6px);height:calc(var(--cell) - 6px);background:#00d26a;box-shadow:0 0 7px #00ff7b;z-index:1}
+    #msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.85);padding:24px 32px;border:2px solid #00d26a;font-size:1.6rem;color:#fff;display:none;z-index:3}
+  </style>
+</head>
+<body>
+  <div id="maze-container"><canvas id="maze"></canvas><div id="ball"></div><div id="win"></div><div id="msg">Geschafft!</div></div>
+  <script>
+    const CELL=24,COLS=15,WALL=4,SIZE=CELL*COLS,BALLR=CELL/2-3;
+    const canvas=document.getElementById('maze'),ctx=canvas.getContext('2d');canvas.width=canvas.height=SIZE;
+    const ball=document.getElementById('ball'),win=document.getElementById('win'),msg=document.getElementById('msg');
+    class Cell{constructor(x,y){this.x=x;this.y=y;this.w=[true,true,true,true];this.v=false;}}
+    const g=[...Array(COLS)].map((_,y)=>[...Array(COLS)].map((_,x)=>new Cell(x,y)));function cell(x,y){return x>=0&&x<COLS&&y>=0&&y<COLS?g[y][x]:undefined;}
+    let cur=cell(0,0);cur.v=true;const st=[];while(cur){const {x,y}=cur;const n=[{d:0,dx:0,dy:-1},{d:1,dx:1,dy:0},{d:2,dx:0,dy:1},{d:3,dx:-1,dy:0}].map(t=>({dir:t.d,c:cell(x+t.dx,y+t.dy)})).filter(n=>n.c&&!n.c.v);if(n.length){const pick=n[Math.random()*n.length|0];cur.w[pick.dir]=false;pick.c.w[(pick.dir+2)%4]=false;st.push(cur);cur=pick.c;cur.v=true;}else cur=st.pop();}
+    const rects=[[0,0,SIZE,WALL],[0,0,WALL,SIZE],[0,SIZE-WALL,SIZE,WALL],[SIZE-WALL,0,WALL,SIZE]];
+    for(let y=0;y<COLS;y++)for(let x=0;x<COLS;x++){const c=g[y][x],px=x*CELL,py=y*CELL;if(c.w[0])rects.push([px,py,CELL,WALL]);if(c.w[1])rects.push([px+CELL-WALL,py,WALL,CELL]);if(c.w[2])rects.push([px,py+CELL-WALL,CELL,WALL]);if(c.w[3])rects.push([px,py,WALL,CELL]);}
+    ctx.fillStyle='#eee';rects.forEach(r=>ctx.fillRect(...r));
+    const offset=(CELL-BALLR*2)/2;let drag=false,ox,oy;
+    function reset(){ball.style.left=ball.style.top=`${offset}px`;msg.style.display='none';drag=false;}reset();win.style.left=win.style.top=`${SIZE-CELL+offset}px`;
+    function hits(x,y){const cx=x+BALLR,cy=y+BALLR;return rects.some(([wx,wy,ww,wh])=>cx>wx&&cx<wx+ww&&cy>wy&&cy<wy+wh);}function goal(x,y){return x+BALLR*2>SIZE-CELL&&y+BALLR*2>SIZE-CELL;}
+    ball.addEventListener('mousedown',e=>{drag=true;ox=e.offsetX;oy=e.offsetY;msg.style.display='none';});
+    document.addEventListener('mousemove',e=>{if(!drag)return;const r=canvas.getBoundingClientRect();let x=e.clientX-r.left-ox,y=e.clientY-r.top-oy;x=Math.max(0,Math.min(x,SIZE-BALLR*2));y=Math.max(0,Math.min(y,SIZE-BALLR*2));if(hits(x,y)){reset();return;}ball.style.left=`${x}px`;ball.style.top=`${y}px`;if(goal(x,y)){msg.style.display='block';drag=false;setTimeout(()=>parent.nextPuzzle(),800);}});
+    document.addEventListener('mouseup',()=>drag=false);
+  </script>
+</body>
+</html>
+  </template>
+
+  <script>
+    // Haupt‑Logik: lädt nacheinander die Templates in ein iFrame
+    const order=['tpl-1','tpl-2','tpl-3','tpl-4'];
+    let idx=0;
+    const cont=document.getElementById('container');
+    function load(i){if(i>=order.length){cont.innerHTML='<h1 style="text-align:center;margin-top:40vh">🎉 Alle Rätsel gelöst! Gratulation! 🎉</h1>';return;}const tpl=document.getElementById(order[i]).innerHTML.trim();const frame=document.createElement('iframe');frame.srcdoc=tpl;cont.innerHTML='';cont.appendChild(frame);} 
+    window.nextPuzzle=()=>{idx++;load(idx);};// macht global verfügbar für die Unter‑Rätsel
+    load(idx);
+  </script>
+</body>
+</html>
