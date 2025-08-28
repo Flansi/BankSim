@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import simpledialog, messagebox
 from app import app, db, User, Transaction, random_iban
 from werkzeug.security import generate_password_hash
-from datetime import date
+from datetime import date, timedelta
 import random
 
 # Simple helpers to create random values for BIC and purpose
@@ -275,11 +275,65 @@ def show_transactions(user_id):
             db.session.commit()
             refresh_tx()
 
+    def fill_tx():
+        with app.app_context():
+            last_txn = (
+                Transaction.query
+                .filter_by(user_id=user_id)
+                .order_by(Transaction.date.desc())
+                .first()
+            )
+            if not last_txn:
+                messagebox.showinfo("Info", "Keine Transaktionen vorhanden")
+                return
+            start_date = last_txn.date + timedelta(days=1)
+
+        date_str = simpledialog.askstring(
+            "Bis Datum",
+            "Transaktionen auffüllen bis (YYYY-MM-DD, leer für heute):",
+        )
+        if date_str is None:
+            return
+        if date_str:
+            try:
+                end_date = date.fromisoformat(date_str)
+            except ValueError:
+                messagebox.showerror("Fehler", "Ungültiges Datum")
+                return
+        else:
+            end_date = date.today()
+
+        if end_date < start_date:
+            messagebox.showinfo("Info", "Bereits aktuell")
+            return
+
+        txns = []
+        curr_date = start_date
+        while curr_date <= end_date:
+            txns.append(
+                Transaction(
+                    user_id=user_id,
+                    date=curr_date,
+                    description=random_purpose(),
+                    amount=round(random.uniform(-500, 500), 2),
+                    iban=random_iban(),
+                    bic=random_bic(),
+                    purpose=random_purpose(),
+                )
+            )
+            curr_date += timedelta(days=1)
+
+        with app.app_context():
+            db.session.add_all(txns)
+            db.session.commit()
+        refresh_tx()
+
     btn_frame = tk.Frame(txn_win)
     btn_frame.pack(fill=tk.X)
     tk.Button(btn_frame, text="Neu", command=add_tx).pack(side=tk.LEFT)
     tk.Button(btn_frame, text="Löschen", command=delete_tx).pack(side=tk.LEFT)
     tk.Button(btn_frame, text="Bearbeiten", command=edit_tx).pack(side=tk.LEFT)
+    tk.Button(btn_frame, text="Auffüllen", command=fill_tx).pack(side=tk.LEFT)
 
     refresh_tx()
     txn_win.mainloop()
